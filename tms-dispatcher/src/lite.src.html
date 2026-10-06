@@ -836,31 +836,30 @@ body:not(.is-brief) .bp-h .chip{display:none}
 
 /* ---- lite: топбар без подписи и часов, поиск по центру; показатели — полоса над событиями ---- */
 .tb-title p,.clock{display:none!important}
-.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px}
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) var(--side-w);column-gap:12px;padding-right:0}
 .topbar .tb-right{grid-column:2;margin:0;justify-self:center}
 .topbar .search{width:420px}
 .avatar{position:relative;cursor:default;outline:0}
 .avatar .tip{z-index:20;box-shadow:var(--shadow-s);position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--surface);font-size:12px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
 .avatar:hover .tip,.avatar:focus-visible .tip{opacity:1}
 
-.side .kpis{display:flex;gap:0;margin:14px 14px 0;padding:10px 4px;background:var(--surface-2);border-radius:18px;flex:none}
-.side .kpi{flex:1 1 auto;min-width:0!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:0;border-left:1px solid var(--line)!important;display:flex;flex-direction:column;gap:2px;animation:none}
-.side .kpi:first-child{border-left:0!important}
-.side .kpi-l{font-size:10.5px;letter-spacing:0;color:var(--text-3)!important;gap:5px}
-.side .kpi-l .sdot{width:6px;height:6px;margin:0}
-.side .kpi-v{font-size:17px;font-weight:700;color:var(--text)!important;line-height:1.15}
-.side .kpi-v small,.side .kpi-v .dim{font-size:11px!important;color:var(--text-3)!important}
-.side .kpi.k-reg{display:grid;grid-template-columns:auto auto;column-gap:6px;align-items:end}
-.side .kpi.k-reg .kpi-l{grid-column:1/3}
-.side .kpi.k-reg .kpi-v{color:var(--brand)!important}
-.side .kpi.k-reg .spark{width:36px;height:16px;margin-bottom:3px}
-.side .kpi .spark path:first-child{fill:var(--brand-soft)}
-.side .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
-.side .kpi .spark circle{fill:var(--brand);stroke:none}
-.side .kpi.is-crit .kpi-v{color:var(--crit)!important}
-.side .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
+.topbar .kpis{display:flex;gap:0;margin:14px 14px 0;padding:10px 4px;background:var(--surface-2);border-radius:18px;flex:none}
+.topbar .kpi{flex:1 1 auto;min-width:0!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:0;border-left:1px solid var(--line)!important;display:flex;flex-direction:column;gap:2px;animation:none}
+.topbar .kpi:first-child{border-left:0!important}
+.topbar .kpi-l{font-size:10.5px;letter-spacing:0;color:var(--text-3)!important;gap:5px}
+.topbar .kpi-l .sdot{width:6px;height:6px;margin:0}
+.topbar .kpi-v{font-size:17px;font-weight:700;color:var(--text)!important;line-height:1.15}
+.topbar .kpi-v small,.topbar .kpi-v .dim{font-size:11px!important;color:var(--text-3)!important}
+.topbar .kpi.k-reg{display:grid;grid-template-columns:auto auto;column-gap:6px;align-items:end}
+.topbar .kpi.k-reg .kpi-l{grid-column:1/3}
+.topbar .kpi.k-reg .kpi-v{color:var(--brand)!important}
+.topbar .kpi.k-reg .spark{width:36px;height:16px;margin-bottom:3px}
+.topbar .kpi .spark path:first-child{fill:var(--brand-soft)}
+.topbar .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
+.topbar .kpi .spark circle{fill:var(--brand);stroke:none}
+.topbar .kpi.is-crit .kpi-v{color:var(--crit)!important}
+.topbar .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
 @keyframes kpiDot{50%{box-shadow:0 0 0 4px var(--crit-soft)}}
-.side .tabs{padding-top:12px}
 
 /* ---- lite: шапка окна замены без строки инцидента; компактный сломанный борт ---- */
 .dz-head{padding-top:16px;padding-bottom:14px;align-items:center}
@@ -874,18 +873,21 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .is-brief .broken:not(.is-open) .loc-btn{width:24px;height:24px}
 .broken{border-radius:18px}
 
-.side .kpis{margin:12px 12px 0;padding:10px 2px}
-.side .kpi{flex:1 1 auto;padding:0 7px!important}
-.side .kpi:first-child{padding-left:10px!important}
-.side .kpi:last-child{padding-right:10px!important}
-.side .kpi-l{font-size:10px;white-space:nowrap}
-.side .kpi-v{font-size:16px}
-.side .kpi-v small{letter-spacing:-.02em}
-.side .kpi.k-reg .spark{width:30px;height:14px}
+.topbar .kpis{margin:12px 12px 0;padding:10px 2px}
+.topbar .kpi{flex:1 1 auto;padding:0 7px!important}
+.topbar .kpi:first-child{padding-left:10px!important}
+.topbar .kpi:last-child{padding-right:10px!important}
+.topbar .kpi-l{font-size:10px;white-space:nowrap}
+.topbar .kpi-v{font-size:16px}
+.topbar .kpi-v small{letter-spacing:-.02em}
+.topbar .kpi.k-reg .spark{width:30px;height:14px}
 .is-brief .broken:not(.is-open){padding:10px 16px}
 .is-brief .broken:not(.is-open) .broken-top{margin-bottom:4px}
 .is-brief .broken:not(.is-open) .broken-top .chip{height:22px}
 .is-brief .broken:not(.is-open) .kv dd{min-height:24px}
+
+/* показатели в топбаре: ширина и правый край — как у правой колонки */
+.topbar .kpis{grid-column:4;margin:0!important;width:100%;box-sizing:border-box;background:var(--surface);box-shadow:var(--shadow-s);border:1px solid var(--line);align-self:center}
 </style>
 </head>
 <body>
@@ -922,6 +924,7 @@ body:not(.is-brief) .bp-h .chip{display:none}
       <label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label>
       <div class="clock"><b id="clock">--:--:--</b><span id="dateLine"></span></div>
     </div>
+    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
   </header>
 
   <main class="stage" id="stage">
@@ -963,7 +966,6 @@ body:not(.is-brief) .bp-h .chip{display:none}
   </main>
 
   <aside class="side" aria-label="События и маршруты">
-    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-tab="feed">События <span class="cnt" id="feedCnt">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="routes">Маршруты <span class="cnt" id="routesCnt">0</span></button>
