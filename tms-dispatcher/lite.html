@@ -953,7 +953,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .eta-tag.is-off{color:var(--text-3)}
 .map-label{color:var(--m-label);font:600 10.5px/1 var(--f-ui);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;transform:translate(-50%,-50%);width:max-content;pointer-events:none;text-shadow:0 0 3px var(--m-land),0 0 6px var(--m-land)}
 .map-label.river{font-style:italic;font-weight:500;letter-spacing:.08em;text-transform:none;font-size:12px;color:var(--m-label)}
-#ymap{position:absolute;inset:0;pointer-events:none}
+#ymap{position:absolute;inset:0;pointer-events:none;background:var(--m-land)}
 .stage.on-yandex #map,.stage.on-yandex .leaflet-container{background:transparent}
 .stage.on-yandex .legend,.stage.on-yandex .scen{bottom:40px}
 .stage.on-yandex .bm{box-shadow:0 0 0 2.5px var(--bg),0 2px 6px rgba(0,0,0,.45)}
@@ -1928,13 +1928,21 @@ let ymap = null, ymLayer = null, ymOK = false, baseMode = 'schema', geoReal = !!
 let candRoutes = {}, candLocked = false;
 const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
 /* Упрощённая версия: только дороги и названия улиц — без зданий, заливок, воды, парков и подписей объектов */
-const YM_MINIMAL = [
+/* Цвета подложки в тон фирменному — как у собственной схемы (--m-land, --m-road) */
+const YM_TINT = {
+  light:{land:'#EDEAF4', urban:'#E8E4F1', road:'#FFFFFF', roadCase:'#D8D1E8', label:'#7D7596'},
+  dark: {land:'#100D1A', urban:'#141121', road:'#2A2540', roadCase:'#08060E', label:'#8A83A6'}
+};
+const ymMinimal = () => { const c = YM_TINT[ymTheme()]; return [
   {tags:{none:['road']}, elements:'geometry', stylers:[{visibility:'off'}]},
   {tags:{none:['road']}, elements:'label', stylers:[{visibility:'off'}]},
+  {tags:{any:['land','landscape']}, elements:'geometry', stylers:[{visibility:'on', color:c.land}]},
+  {tags:{any:['urban_area']}, elements:'geometry', stylers:[{visibility:'on', color:c.urban}]},
+  {tags:{any:['road']}, elements:'geometry.fill', stylers:[{color:c.road}]},
+  {tags:{any:['road']}, elements:'geometry.outline', stylers:[{color:c.roadCase}]},
   {tags:{any:['road']}, elements:'label', stylers:[{zoom:[0,13.5], visibility:'off'}]},
-  {tags:{any:['road']}, elements:'geometry', stylers:[{saturation:-0.6}]},
-  {elements:'label.text', stylers:[{opacity:0.75}]}
-];
+  {elements:'label.text.fill', stylers:[{color:c.label}]}
+]; };
 let ymVer = 0;
 const loadScript = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.async = true; el.onload = res; el.onerror = () => rej(new Error('скрипт не загрузился')); document.head.appendChild(el); });
 /* Сначала JS API 3.0 (полноценный «Минимум»), при отказе — запасной JS API 2.1 */
@@ -1981,7 +1989,7 @@ function initYandex(){
   const c = map.getCenter();
   const loc = {center:[c.lng, c.lat], zoom:Math.round(map.getZoom())};
   try{
-    ymLayer = new YMapDefaultSchemeLayer({customization: YM_MINIMAL, theme: ymTheme()});
+    ymLayer = new YMapDefaultSchemeLayer({customization: ymMinimal(), theme: ymTheme()});
     ymap = new YMap($('#ymap'), {location:loc, behaviors:[], theme: ymTheme(), zoomRounding:'smooth'}, [ymLayer]);
   }catch(e){
     console.warn('JS API 3.0: стиль или тема не приняты, запускаю без них', e);
@@ -2021,14 +2029,14 @@ function syncYandex(){
   if(ymVer===2){ ymap.container.fitToViewport(); ymap.setCenter([c.lat, c.lng], map.getZoom(), {duration:0}); }
   else ymap.update({location:{center:[c.lng, c.lat], zoom:map.getZoom(), duration:0}});
 }
-function themeYandex(){ if(!ymap || ymVer!==3) return; try{ ymap.update({theme: ymTheme()}); ymLayer.update({theme: ymTheme()}); }catch(e){} }
+function themeYandex(){ if(!ymap || ymVer!==3) return; try{ ymap.update({theme: ymTheme()}); ymLayer.update({theme: ymTheme(), customization: baseMode==='min' ? ymMinimal() : []}); }catch(e){} }
 function setBasemap(mode){
   baseMode = (mode!=='schema' && ymOK) ? mode : 'schema';
   const y = baseMode!=='schema';
   $('#bmSchema').setAttribute('aria-pressed', !y); $('#bmMin').setAttribute('aria-pressed', baseMode==='min');
   $('#stage').classList.toggle('on-yandex', y);
   if(y){
-    if(ymVer===3){ try{ ymLayer.update({customization: baseMode==='min' ? YM_MINIMAL : []}); }catch(e){} }
+    if(ymVer===3){ try{ ymLayer.update({customization: baseMode==='min' ? ymMinimal() : []}); }catch(e){} }
     $('#stage').classList.toggle('ym-min', baseMode==='min');
     map.removeLayer(L_.base); map.removeLayer(L_.labels); syncYandex(); watchLegend();
   } else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); placeLegend(); }
