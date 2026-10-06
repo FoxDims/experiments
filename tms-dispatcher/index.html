@@ -690,6 +690,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --m-land:#E8EAEE; --m-urban:#E1E4E9; --m-water:#C6D5E5; --m-park:#D8E4D3; --m-meadow:#E2EADB;
   --m-road:#FFFFFF; --m-case:#D0D4DC; --m-minor:#F3F4F7; --m-rail:#B4BAC6; --m-label:#8A91A1;
   --m-route:#8F98AC; --m-stop:#FFFFFF;
+  --ym-filter:saturate(.35) contrast(.96) brightness(1.02);
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -708,6 +709,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
     --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
     --m-route:#4C5569; --m-stop:#12151C;
+    --ym-filter:invert(1) hue-rotate(180deg) saturate(.3) brightness(.8) contrast(.9);
     color-scheme:dark;
   }
 }
@@ -726,6 +728,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
   --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
   --m-route:#4C5569; --m-stop:#12151C;
+  --ym-filter:invert(1) hue-rotate(180deg) saturate(.3) brightness(.8) contrast(.9);
   color-scheme:dark;
 }
 
@@ -861,7 +864,9 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .eta-tag.is-off{color:var(--text-3)}
 .map-label{color:var(--m-label);font:600 10.5px/1 var(--f-ui);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;transform:translate(-50%,-50%);width:max-content;pointer-events:none;text-shadow:0 0 3px var(--m-land),0 0 6px var(--m-land)}
 .map-label.river{font-style:italic;font-weight:500;letter-spacing:.08em;text-transform:none;font-size:12px;color:var(--m-label)}
-.map-label.tiles-on{display:none}
+#ymap{position:absolute;inset:0;pointer-events:none}
+#ymap [class*="ground-pane"]{filter:var(--ym-filter)}
+.stage.on-yandex #map,.stage.on-yandex .leaflet-container{background:transparent}
 
 /* leaflet popup = bus card */
 .leaflet-popup.bus-pop .leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--line);padding:0}
@@ -1202,6 +1207,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
   </header>
 
   <main class="stage" id="stage">
+    <div id="ymap" aria-hidden="true"></div>
     <div id="map" aria-label="Карта Рязани с движением автобусов"></div>
     <div class="overlay-tl">
       <button class="chipbtn" id="tgStops" aria-pressed="true"><span data-ic="pin"></span>Остановки</button>
@@ -1216,7 +1222,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
       </div>
       <div class="basemap-sw" role="group" aria-label="Подложка">
         <button id="bmSchema" aria-pressed="true">Схема</button>
-        <button id="bmTiles" aria-pressed="false" disabled title="Тайлы OpenStreetMap недоступны в этой среде">OSM</button>
+        <button id="bmYandex" aria-pressed="false" disabled title="Яндекс Карты загружаются…">Яндекс</button>
       </div>
     </div>
     <div class="alert" id="alert" hidden role="alert"></div>
@@ -1257,6 +1263,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 
 <div class="ux" id="ux" hidden></div>
 
+<script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
 (function(){
@@ -1426,10 +1433,10 @@ function nearestStop(route, d){ return routes[route].stops.reduce((a,s)=>Math.ab
 function busStatus(b){ if(b.state==='broken') return 'crit'; if(b.state==='off') return 'off'; return status(b.dev); }
 
 /* ================= map ================= */
-let map, basePane, tilesLayer=null, tilesOK=false, useTiles=false;
+let map;
 const L_ = {};
 function initMap(){
-  map = L.map('map',{zoomControl:false, attributionControl:false, preferCanvas:false, zoomSnap:.25, minZoom:11, maxZoom:17});
+  map = L.map('map',{crs:L.CRS.EPSG3395, zoomControl:false, attributionControl:false, preferCanvas:false, zoomSnap:.25, minZoom:11, maxZoom:17});
   map.createPane('base').style.zIndex = 250;
   map.createPane('routes').style.zIndex = 410;
   map.createPane('pulse').style.zIndex = 590;
@@ -1446,7 +1453,6 @@ function initMap(){
   drawRoutes();
   fitCity(false);
   map.on('zoomend', ()=>{ const show = map.getZoom() >= 12.5 && $('#tgStops').getAttribute('aria-pressed')==='true'; if(show && !map.hasLayer(L_.stops)) map.addLayer(L_.stops); if(!show && map.hasLayer(L_.stops)) map.removeLayer(L_.stops); });
-  probeTiles();
 }
 function fitCity(anim=true){ const b = L.latLngBounds([]); Object.values(routes).forEach(r=>r.path.lls.forEach(ll=>b.extend(ll))); map.fitBounds(b,{padding:[60,60], animate:anim}); }
 
@@ -1509,20 +1515,142 @@ function drawBase(cv){
   lab([54.6000,39.7950],'Лесопарк','river'); lab([54.6418,39.7445],'Кремль','river');
 }
 function restyleBase(){ baseShapes.forEach(([l,f])=>l.setStyle(f())); }
-function probeTiles(){
-  const url = () => `https://{s}.basemaps.cartocdn.com/${isDark()?'dark_all':'light_all'}/{z}/{x}/{y}{r}.png`;
-  const t = L.tileLayer(url(), {subdomains:'abcd', maxZoom:19, attribution:'© OpenStreetMap, © CARTO'});
-  let decided=false;
-  t.on('tileload', ()=>{ if(decided) return; decided=true; tilesOK=true; tilesLayer=t; tilesLayer._urlFn=url; const btn=$('#bmTiles'); btn.disabled=false; btn.title='Тайлы CARTO / OpenStreetMap'; setBasemap(true); });
-  setTimeout(()=>{ if(!decided){ decided=true; map.removeLayer(t); } }, 5000);
-  t.addTo(map);
+/* ================= Яндекс Карты (JS API 2.1) =================
+   Leaflet остаётся слоем данных (маршруты, автобусы, эффекты) в проекции EPSG:3395 — той же, что у Яндекса.
+   Под ним лежит синхронизированная карта Яндекса; трассы строятся геокодером и маршрутизатором. */
+let ymap = null, ymOK = false, baseMode = 'schema', geoReal = false, pendingGeo = null;
+let candRoutes = {}, candLocked = false;
+const RYAZAN_BOUNDS = [[54.55,39.52],[54.73,39.92]];
+const GEO_VER = 'st-geo-v1';
+const ROUTE_NODES = {
+  '10':['Рязань, улица Зубковой','Рязань, Московское шоссе','Рязань, площадь Победы','Рязань, Первомайский проспект','Рязань, площадь Ленина','Рязань, улица Есенина','Рязань, посёлок Приокский'],
+  '3':['Рязань, Песочня','Рязань, Московское шоссе','Рязань, улица Гагарина','Рязань, Рязанский кремль'],
+  '16':['Рязань, Дягилево','Рязань, Московское шоссе','Рязань, площадь Победы','Рязань, площадь Ленина','Рязань, Почтовая улица','Рязань, Касимовское шоссе'],
+  '24':['Рязань, Соколовка','Рязань, улица Новосёлов','Рязань, улица Есенина','Рязань, площадь Ленина','Рязань, Рязанский кремль'],
+  '35':['Рязань, Михайловское шоссе','Рязань, улица Есенина','Рязань, Первомайский проспект','Рязань, площадь Победы','Рязань, Московское шоссе','Рязань, улица Зубковой'],
+  '61':['Рязань, Песочня','Рязань, Северная окружная дорога','Рязань, Карцево','Рязань, Кальное'],
+  '9':['Рязань, Соколовка','Рязань, улица Новаторов','Рязань, посёлок Приокский']
+};
+const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
+function loadYandex(){
+  const key = (window.ST_CONFIG||{}).yandexApiKey;
+  if(!key){ $('#bmYandex').title='Ключ Яндекс Карт не задан (config.js)'; return; }
+  const s = document.createElement('script');
+  s.src = `https://api-maps.yandex.ru/2.1/?apikey=${encodeURIComponent(key)}&lang=ru_RU`;
+  s.async = true;
+  s.onload = () => { if(window.ymaps) ymaps.ready(initYandex, ymFail); else ymFail('ymaps не определён'); };
+  s.onerror = () => ymFail('скрипт не загрузился');
+  document.head.appendChild(s);
 }
-function setBasemap(tiles){
-  useTiles = tiles && tilesOK;
-  $('#bmTiles').setAttribute('aria-pressed', useTiles); $('#bmSchema').setAttribute('aria-pressed', !useTiles);
-  if(useTiles){ tilesLayer.setUrl(tilesLayer._urlFn()); if(!map.hasLayer(tilesLayer)) tilesLayer.addTo(map); map.removeLayer(L_.base); map.removeLayer(L_.labels);
-    if(!map.attributionControl){ L.control.attribution({prefix:false, position:'bottomright'}).addTo(map); } map.attributionControl.addAttribution('© OpenStreetMap, © CARTO'); }
-  else { if(tilesLayer && map.hasLayer(tilesLayer)) map.removeLayer(tilesLayer); if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); }
+function ymFail(e){ console.warn('Яндекс Карты недоступны, используется схема:', e); $('#bmYandex').title='Яндекс Карты недоступны: проверьте ключ и разрешённые домены'; }
+function initYandex(){
+  try{
+    const c = map.getCenter();
+    ymap = new ymaps.Map('ymap', {center:[c.lat,c.lng], zoom:map.getZoom(), controls:[]},
+      {suppressMapOpenBlock:true, avoidFractionalZoom:false, yandexMapDisablePoiInteractivity:true});
+    ymap.behaviors.disable(['drag','scrollZoom','dblClickZoom','multiTouch','rightMouseButtonMagnifier','leftMouseButtonMagnifier']);
+  }catch(e){ ymFail(e); return; }
+  ymOK = true;
+  const b = $('#bmYandex'); b.disabled = false; b.title = 'Подложка Яндекс Карт';
+  map.on('move zoom', syncYandex);
+  map.on('zoomanim', e => ymap.setCenter([e.center.lat, e.center.lng], e.zoom, {duration:250}));
+  map.on('resize', () => { ymap.container.fitToViewport(); syncYandex(); });
+  setBasemap('yandex');
+  loadRealGeometry();
+}
+function syncYandex(){ if(!ymap) return; const c = map.getCenter(); ymap.setCenter([c.lat, c.lng], map.getZoom(), {duration:0}); }
+function setBasemap(mode){
+  baseMode = (mode==='yandex' && ymOK) ? 'yandex' : 'schema';
+  const y = baseMode==='yandex';
+  $('#bmYandex').setAttribute('aria-pressed', y); $('#bmSchema').setAttribute('aria-pressed', !y);
+  $('#stage').classList.toggle('on-yandex', y);
+  if(y){ map.removeLayer(L_.base); map.removeLayer(L_.labels); ymap.container.fitToViewport(); syncYandex(); }
+  else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); }
+}
+function geocode(q){
+  return ymaps.geocode(q, {results:1, boundedBy:RYAZAN_BOUNDS, strictBounds:true})
+    .then(r => { const o = r.geoObjects.get(0); return o ? o.geometry.getCoordinates() : null; });
+}
+function ymRoute(points){
+  return ymaps.route(points, {routingMode:'auto'}).then(route => {
+    const pts = []; let last = '';
+    const push = (c, st) => { const ll = [+c[0].toFixed(6), +c[1].toFixed(6)]; const p = pts[pts.length-1];
+      if(p && hav(p.ll, ll) < 6) return; pts.push({ll, st}); };
+    route.getPaths().each(path => {
+      const segs = path.getSegments ? path.getSegments() : null;
+      if(segs && segs.length) segs.forEach(sg => { const st = (sg.getStreet && sg.getStreet()) || last; last = st; sg.getCoordinates().forEach(c => push(c, st)); });
+      else path.geometry.getCoordinates().forEach(c => push(c, last));
+    });
+    let known = ''; for(let i=pts.length-1;i>=0;i--){ if(pts[i].st) known = pts[i].st; else pts[i].st = known; }
+    pts.forEach(p => { if(!p.st) p.st = 'проезд'; });
+    return {pts, len: route.getLength(), sec: route.getJamsTime ? route.getJamsTime() : route.getTime()};
+  });
+}
+async function loadRealGeometry(){
+  let cache = {}; try{ cache = JSON.parse(localStorage.getItem(GEO_VER) || '{}'); }catch(e){}
+  const out = {};
+  for(const def of ROUTE_DEFS){
+    if(cache[def.id]){ out[def.id] = cache[def.id]; continue; }
+    try{
+      const nodes = (await Promise.all(ROUTE_NODES[def.id].map(q => withTimeout(geocode(q), 8000).catch(() => null)))).filter(Boolean);
+      if(nodes.length < 2) continue;
+      const r = await withTimeout(ymRoute(nodes), 15000);
+      const chain = nodes.slice(1).reduce((a,p,i) => a + hav(nodes[i], p), 0);
+      if(r.pts.length < 2 || r.len > chain*2.4){ console.warn(`М${def.id}: трасса отброшена (${Math.round(r.len)} м при ${Math.round(chain)} м по прямой)`); continue; }
+      out[def.id] = {pts: r.pts};
+    }catch(e){ console.warn(`М${def.id}: не удалось построить трассу`, e); }
+  }
+  try{ localStorage.setItem(GEO_VER, JSON.stringify({...cache, ...out})); }catch(e){}
+  if(!Object.keys(out).length) return;
+  pendingGeo = out;
+  if(state==='idle') applyGeometry();
+}
+function applyGeometry(){
+  if(!pendingGeo) return; const g = pendingGeo; pendingGeo = null; let n = 0;
+  Object.entries(g).forEach(([id, {pts}]) => {
+    const r = routes[id]; if(!r || !pts || pts.length < 2) return;
+    const cum = [0]; for(let i=1;i<pts.length;i++) cum.push(cum[i-1] + hav(pts[i-1].ll, pts[i].ll));
+    const path = {pts, cum, len: cum[cum.length-1], lls: pts.map(p => p.ll)};
+    const old = r.path.len, k = path.len/old;
+    r.stops.forEach(s2 => { s2.d *= k; s2.ll = pointAt(path, s2.d).ll; s2.marker.setLatLng(s2.ll); });
+    if(id==='10') incD *= k;
+    Object.values(buses).forEach(b => { if(b.route===id) b.phase *= k; });
+    r.path = path; r.cycleMin = 2*path.len/REAL_SPEED/60;
+    routeLines[id].line.setLatLngs(path.lls); routeLines[id].glow.setLatLngs(path.lls);
+    n++;
+  });
+  if(!n) return;
+  geoReal = true;
+  relocateReserves(); drawReserves();
+  Object.values(buses).forEach(b => { busMarkers[b.id] && busMarkers[b.id].setLatLng(busPos(b).ll); });
+  renderRoutes(); fitCity(true);
+  toast(`${ic('route')} Трассы ${n} ${plural(n,'маршрута','маршрутов','маршрутов')} построены по улицам Рязани`);
+}
+/* Резерв стоит на тех же смещениях от места аварии, что и на схеме, но прижат к ближайшей реальной улице маршрутной сети */
+const RES_OFFSETS = {};
+function relocateReserves(){
+  if(!geoReal) return;
+  const inc = pointAt(routes['10'].path, incD).ll, ixy = toXY(inc);
+  reserves.forEach(r => {
+    const off = RES_OFFSETS[r.id]; if(!off) return;
+    const target = toLL([ixy[0]+off[0], ixy[1]+off[1]]);
+    let best = null;
+    Object.values(routes).forEach(rt => { const d = project(rt.path, target); const p = pointAt(rt.path, d).ll; const dist = hav(p, target);
+      if(rt.id==='10') return; /* резерв не ставим на линию сломанного маршрута */
+      if(!best || dist < best.dist) best = {ll:p, dist}; });
+    if(best) r.ll = best.ll;
+  });
+}
+function rememberReserveOffsets(){
+  const ixy = toXY(pointAt(routes['10'].path, incD).ll);
+  reserves.forEach(r => { const xy = toXY(r.ll); RES_OFFSETS[r.id] = [xy[0]-ixy[0], xy[1]-ixy[1]]; });
+}
+function routeCandidates(){
+  candRoutes = {}; candLocked = false;
+  if(!ymOK || !incident) return;
+  reserves.forEach(r => withTimeout(ymRoute([r.ll, incident.ll]), 10000)
+    .then(res => { if(candLocked || !incident) return; candRoutes[r.id] = {lls: res.pts.map(p => p.ll), len: res.len, sec: res.sec}; })
+    .catch(() => {}));
 }
 
 /* routes & stops */
@@ -1781,7 +1909,7 @@ $('#soundBtn').addEventListener('click', ()=>{ soundOn=!soundOn; const b=$('#sou
 
 /* ---------- theme ---------- */
 const isDark = () => { const t=document.documentElement.dataset.theme; return t ? t==='dark' : matchMedia('(prefers-color-scheme: dark)').matches; };
-function applyTheme(t){ if(t) document.documentElement.dataset.theme=t; const b=$('#themeBtn'); b.innerHTML = ic(isDark()?'sun':'moon') + `<span class="tip">${isDark()?'Светлая тема':'Тёмная тема'}</span>`; if(map){ restyleBase(); styleRoutes(); if(useTiles) tilesLayer.setUrl(tilesLayer._urlFn()); drawFx(); } }
+function applyTheme(t){ if(t) document.documentElement.dataset.theme=t; const b=$('#themeBtn'); b.innerHTML = ic(isDark()?'sun':'moon') + `<span class="tip">${isDark()?'Светлая тема':'Тёмная тема'}</span>`; if(map){ restyleBase(); styleRoutes(); drawFx(); } }
 try{ const saved=localStorage.getItem('st-theme'); if(saved) document.documentElement.dataset.theme=saved; }catch(e){}
 $('#themeBtn').addEventListener('click', ()=>{ const t = isDark()?'light':'dark'; try{ localStorage.setItem('st-theme',t); }catch(e){} applyTheme(t); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>applyTheme());
@@ -1807,7 +1935,7 @@ function triggerIncident(){
   incident = {id:2417, bus:b, ll:p.ll, d:p.d, street:p.st, stop, t0:Date.now(), plan:Math.round(plan), gapMin:Math.round(gap)};
   pushFeed({lvl:'crit', title:'М10 · Борт 1047: поломка на линии', sub:`${p.st}, у ост. «${stop.name}»`});
   setState('incident');
-  drawFx();
+  drawFx(); routeCandidates();
   beep(); clearInterval(beepTimer); beepTimer = setInterval(()=>{ if(state==='incident') beep(); }, 7000);
 }
 function focusIncident(){ map.flyTo(incident.ll, 15, {duration:.7}); setTimeout(()=>openBusPopup(incident.bus), 750); }
@@ -1822,18 +1950,20 @@ function drawFx(){
       const path = candPath(c);
       L.polyline(path,{pane:'routes', color: sel?brand:muted, weight: sel?4:2.5, opacity: c.kind==='break'?.4:1, dashArray: sel?'1 8':'2 7', lineCap:'round', interactive:false}).addTo(L_.fx);
       if(state==='deciding'){
-        const mid = path[1];
+        const mid = path[Math.floor(path.length/2)];
         L.marker(mid,{icon:L.divIcon({className:'', html:`<div class="eta-tag${sel?' is-sel':''}${c.kind==='break'?' is-off':''}">${c.id} · ${c.kind==='break'?'до '+c.until:c.eta+' мин'}</div>`, iconSize:[0,0]}), interactive:false, pane:'labels'}).addTo(L_.fx);
       }
     });
   }
 }
-function candPath(c){ const a=c.ll, b=incident.ll; return [a, [a[0]*.5+b[0]*.5, a[1]*.35+b[1]*.65], b]; }
+function candPath(c){ if(candRoutes[c.id]) return candRoutes[c.id].lls; const a=c.ll, b=incident.ll; return [a, [a[0]*.5+b[0]*.5, a[1]*.35+b[1]*.65], b]; }
 
 /* candidates */
 function cands(){
   return reserves.map(r=>{
-    const dist = hav(r.ll, incident.ll)*1.35; const eta = Math.max(2, Math.round(dist/1000/22*60 + r.prep));
+    const real = candRoutes[r.id];
+    const dist = real ? real.len : hav(r.ll, incident.ll)*1.35;
+    const eta = Math.max(2, Math.round((real ? real.sec/60 : dist/1000/22*60) + r.prep));
     const penalty = r.kind==='busy'?6 : r.kind==='depot'?2 : r.kind==='break'?99 : 0;
     const capPen = r.cap < incident.bus.cap ? 3 : 0;
     return {...r, dist, eta, score: eta + penalty + capPen};
@@ -1842,7 +1972,7 @@ function cands(){
 
 function openDecision(){
   if(!(state==='incident' || state==='deciding')) return;
-  clearInterval(beepTimer);
+  clearInterval(beepTimer); candLocked = true;
   const list = cands(); if(!selCand || !list.find(c=>c.id===selCand.id)) selCand = list[0];
   setState('deciding');
   renderDecision(); openDrawer();
@@ -2104,8 +2234,8 @@ function resetScenario(){
   L_.buses.clearLayers(); L_.fx.clearLayers();
   Object.keys(buses).forEach(k=>delete buses[k]); Object.keys(busMarkers).forEach(k=>delete busMarkers[k]);
   incident=null; selCand=null; assignAnim=null; lastReaction=null; selRoute=null; $('#routeFilter').hidden=true;
-  rebuildFleet(); drawReserves(); createBusMarkers(); seedFeed();
-  setState('idle'); fitCity(true); startCountdown();
+  candRoutes = {}; rebuildFleet(); relocateReserves(); drawReserves(); createBusMarkers(); seedFeed();
+  setState('idle'); fitCity(true); startCountdown(); applyGeometry();
 }
 function rebuildFleet(){ buildFleet(); }
 
@@ -2142,8 +2272,8 @@ $('#tgReserve').addEventListener('click', e=>{ const b=e.currentTarget; const on
 $('#zIn').addEventListener('click', ()=>map.zoomIn(.75));
 $('#zOut').addEventListener('click', ()=>map.zoomOut(.75));
 $('#zFit').addEventListener('click', ()=>fitCity(true));
-$('#bmSchema').addEventListener('click', ()=>setBasemap(false));
-$('#bmTiles').addEventListener('click', ()=>setBasemap(true));
+$('#bmSchema').addEventListener('click', ()=>setBasemap('schema'));
+$('#bmYandex').addEventListener('click', ()=>setBasemap('yandex'));
 $$('[data-stub]').forEach(b=>b.addEventListener('click', ()=>toast('Раздел вне рамок прототипа: показаны экраны «Карта» и «Замена»')));
 $('#railInc').addEventListener('click', ()=>{ if(state==='incident'||state==='deciding') openDecision(); else if(state==='assigned') openDrawer(); else toast('Активных инцидентов нет'); });
 
@@ -2216,7 +2346,7 @@ function renderUX(){
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="card"><h5>Горячие клавиши</h5><div class="keys"><span class="kbd">Enter</span><span>Решить аварию / назначить выбранный борт</span><span class="kbd">1–4</span><span>Выбрать кандидата в окне замены</span><span class="kbd">Esc</span><span>Закрыть панель, снять выделение маршрута</span><span class="kbd">/</span><span>Поиск по борту, маршруту или остановке</span></div></div>
-      <div class="card"><h5>Допущения прототипа</h5><ul><li>Трассы маршрутов и названия остановок правдоподобны и привязаны к реальным улицам Рязани, но не повторяют bus62.ru точь-в-точь.</li><li>Подложка — собственная векторная схема. Если доступны тайлы OpenStreetMap / CARTO, их можно включить переключателем «OSM».</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
+      <div class="card"><h5>Допущения прототипа</h5><ul><li>Опорные точки маршрутов и названия остановок правдоподобны, но не повторяют bus62.ru точь-в-точь.</li><li>Подложка — Яндекс Карты (JS API 2.1), трассы строятся маршрутизатором Яндекса по реальным улицам. Без доступа к API показывается собственная векторная схема города.</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
     </div>
   </section>
   </div>`;
@@ -2230,6 +2360,7 @@ $('#ux').addEventListener('click', e=>{ if(e.target.closest('[data-ux-close]')) 
 buildRoutes();
 buildFleet();
 initMap();
+rememberReserveOffsets();
 drawReserves();
 createBusMarkers();
 seedFeed();
@@ -2239,6 +2370,7 @@ setState('idle');
 startCountdown();
 uiTick();
 requestAnimationFrame(loop);
+loadYandex();
 window.addEventListener('resize', ()=> map.invalidateSize());
 })();
 </script>

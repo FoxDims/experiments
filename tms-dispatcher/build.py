@@ -12,5 +12,7 @@ if len(sys.argv) > 2:
     head = re.search(r"<head>(.*?)</head>", full, re.S).group(1)
     head = re.sub(r'<meta charset[^>]*>\s*|<meta name="viewport"[^>]*>\s*', "", head)
     body = re.search(r"<body>(.*)</body>", full, re.S).group(1)
+    # config.js с ключом Яндекса в артефакт не публикуется: там внешние скрипты запрещены, работает схема
+    body = body.replace('<script src="config.js"></script>\n', "")
     pathlib.Path(sys.argv[2]).write_text(head.strip() + "\n" + body.strip() + "\n", encoding="utf-8")
 print("ok")
