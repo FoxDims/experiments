@@ -888,6 +888,28 @@ body:not(.is-brief) .bp-h .chip{display:none}
 
 /* показатели в топбаре: ширина и правый край — как у правой колонки */
 .topbar .kpis{grid-column:4;margin:0!important;width:100%;box-sizing:border-box;background:var(--surface);box-shadow:var(--shadow-s);border:1px solid var(--line);align-self:center}
+
+/* ---- lite: окно замены шириной с правую колонку ---- */
+.app{--drawer-w:var(--side-w)}
+.dz-head,.dz-body,.dz-foot{padding-left:16px;padding-right:16px}
+.dz-head h2{font-size:19px}
+.dz-body{gap:20px}
+.dz-sec h3{flex-wrap:wrap}
+.dz-sec h3>span{font-size:11px}
+.cand{padding-left:14px;padding-right:14px;column-gap:12px}
+.dz-foot{gap:8px}
+.dz-foot .btn-lg{padding:0 16px}
+.dz-foot [data-primary]{flex:1;justify-content:center}
+.is-brief .broken:not(.is-open){padding:10px 14px}
+.is-brief .broken:not(.is-open) .kv{column-gap:12px}
+.impact{gap:6px 14px}
+.cand .c-line1{align-items:center;column-gap:8px;row-gap:2px}
+.cand .c-model{order:9;flex-basis:100%}
+.cand .c-place{margin-top:1px}
+.broken.is-open .broken-top{flex-wrap:wrap;row-gap:4px}
+.broken.is-open .broken-top .sub{order:9;flex-basis:100%}
+.broken.is-open .kv{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.broken.is-open .kv .wide{grid-column:1/-1}
 </style>
 </head>
 <body>
@@ -1901,7 +1923,7 @@ function renderDecision(){
     <section class="dz-sec">
       <h3>Сломанный автобус</h3>
       <div class="broken" id="broken">
-        <div class="broken-top"><span class="broken-id">${b.id}</span><span class="sub">${b.plate}<br>${b.model} · ${b.cap} мест</span><span class="chip crit">Сход с линии</span><button class="more-btn" data-act="more" aria-expanded="false">Подробнее${ic('chevd')}</button></div>
+        <div class="broken-top"><span class="broken-id">${b.id}</span><span class="sub">${b.plate} · ${b.model} · ${b.cap} мест</span><span class="chip crit">Сход с линии</span><button class="more-btn" data-act="more" aria-expanded="false">Подробнее${ic('chevd')}</button></div>
         <dl class="kv">
           <div class="wide"><dt>Где</dt><dd>${addr(inc)}<button class="loc-btn" data-act="show" title="Показать на карте" aria-label="Показать на карте">${ic('target')}</button><small>${inc.ll[0].toFixed(5)}, ${inc.ll[1].toFixed(5)} · в сторону «${dirTo()}»</small></dd></div>
           <div><dt>Когда</dt><dd class="num">${hhmmss(new Date(inc.t0))}</dd></div>
