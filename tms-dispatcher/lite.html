@@ -1605,6 +1605,34 @@ body:not(.is-brief) .bp-h .chip{display:none}
 /* lite: смысловые блоки окна замены разделены крупнее */
 .dz-body{gap:32px;padding-top:20px}
 .dz-sec h3{margin-bottom:12px}
+
+/* ---- lite: топбар — показатели слева (крупно), поиск в середине, пользователь справа ---- */
+.topbar{display:flex!important;align-items:center;gap:20px;padding:0 0 0 6px}
+.topbar .kpis{grid-column:auto;width:auto;flex:none;padding:10px 4px;border-radius:20px}
+.topbar .kpi{flex:none;padding:0 18px!important;gap:3px}
+.topbar .kpi:first-child{padding-left:18px!important}
+.topbar .kpi:last-child{padding-right:18px!important}
+.topbar .kpi-l{font-size:12px;gap:6px}
+.topbar .kpi-l .sdot{width:7px;height:7px}
+.topbar .kpi-v{font-size:22px;line-height:1.1}
+.topbar .kpi-v small,.topbar .kpi-v .dim{font-size:14px!important}
+.topbar .kpi.k-reg{column-gap:10px}
+.topbar .kpi.k-reg .spark{width:56px;height:20px;margin-bottom:4px}
+.topbar .tb-right{flex:1;justify-content:center;min-width:0;margin:0}
+.topbar .search{width:100%;max-width:420px}
+.tb-user{display:flex;align-items:center;gap:12px;flex:none;padding:6px 18px 6px 6px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-s)}
+.tb-user .avatar{margin:0;width:44px;height:44px}
+.tb-user-t{display:flex;flex-direction:column;line-height:1.25}
+.tb-user-t b{font-size:14px;font-weight:600;white-space:nowrap}
+.tb-user-t span{font-size:12px;color:var(--text-3);white-space:nowrap}
+@media (max-width:1440px){
+  .topbar .kpi{padding:0 12px!important}
+  .topbar .kpi:first-child{padding-left:14px!important}
+  .topbar .kpi:last-child{padding-right:14px!important}
+  .topbar .kpi-v{font-size:19px}
+  .topbar .kpi.k-reg .spark{width:40px}
+  .tb-user-t span{display:none}
+}
 </style>
 </head>
 <body>
@@ -1630,18 +1658,16 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <button class="rail-btn" id="uxBtn"><span data-ic="book"></span><span class="tip">UX-логика прототипа</span></button>
     <button class="rail-btn" id="soundBtn" aria-pressed="true"><span data-ic="volume"></span><span class="tip">Звук аварий: вкл</span></button>
     <button class="rail-btn" id="themeBtn"><span data-ic="moon"></span><span class="tip">Сменить тему</span></button>
-    <div class="avatar" tabindex="0" aria-describedby="shiftLine">АМ<span class="tip" id="shiftLine" role="tooltip">Рязань · смена · диспетчер Морозова А. С.</span></div>
   </nav>
 
   <header class="topbar">
-    <div class="tb-title">
-      <h1>Оперативная обстановка</h1>
-    </div>
+    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
+    <h1 class="sr">Оперативная обстановка</h1>
     <div class="tb-right">
       <label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label>
       <div class="clock"><b id="clock">--:--:--</b><span id="dateLine"></span></div>
     </div>
-    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
+    <div class="tb-user"><div class="avatar" aria-hidden="true">АМ</div><div class="tb-user-t"><b>Морозова А. С.</b><span id="shiftLine">Старший диспетчер</span></div></div>
   </header>
 
   <main class="stage" id="stage">
@@ -2813,7 +2839,7 @@ function uiTick(){
   if(assignAnim){ $$('[data-eta]').forEach(el=> el.textContent = mmss(assignAnim.leftReal)); $$('[data-bar]').forEach(el=> el.style.width = Math.round(assignAnim.progress*100)+'%'); }
   Object.values(buses).forEach(b=>{ if(b.state==='line' && !b.fixedDev) b.dev = clamp(b.dev + (Math.random()-.5)*6, -110, 110); });
 }
-function shiftLine(){ const h = new Date().getHours(); const s = h>=6&&h<14 ? 'утренняя смена' : h>=14&&h<22 ? 'вечерняя смена' : 'ночная смена'; $('#shiftLine').textContent = `Рязань · ${s} · диспетчер Морозова А. С.`; }
+function shiftLine(){ const h = new Date().getHours(); const sh = h>=6&&h<14 ? 'утренняя смена' : h>=14&&h<22 ? 'вечерняя смена' : 'ночная смена'; $('#shiftLine').textContent = `Старший диспетчер · ${sh}`; $('.tb-user').title = `Рязань · ${sh}`; }
 
 /* ================= reset ================= */
 function resetScenario(){
