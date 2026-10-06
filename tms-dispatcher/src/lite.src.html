@@ -66,6 +66,25 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .is-brief .rcard.is-ok:not(.is-sel) :is(.rm,.rbar,.chip){display:none}
 .is-brief .rcard.is-ok:not(.is-sel)::after{content:"";grid-column:3;grid-row:1;width:8px;height:8px;border-radius:50%;background:var(--ok);justify-self:end;margin-right:4px}
 @media (max-width:1180px){ .dens button{padding:0 10px} }
+
+/* ---- lite: панель демо скрыта, легенда — выпадашка, карточка сломанного в одну строку ---- */
+.scen{display:none!important}
+.lg-wrap{position:relative}
+.lg-btn .lg-dots{display:inline-flex;gap:3px}
+.lg-btn .lg-dots .sdot{width:7px;height:7px;margin:0}
+.lg-btn>.ic:last-child{width:14px;height:14px;transition:transform .2s;opacity:.7}
+.lg-btn[aria-expanded="true"]{color:var(--text)}
+.lg-btn[aria-expanded="true"]>.ic:last-child{transform:rotate(180deg)}
+.lg-wrap .legend,.stage.on-yandex .lg-wrap .legend{position:absolute;top:calc(100% + 8px);left:0;bottom:auto;min-width:220px}
+.lg-wrap .legend .lg-h{display:none}
+.loc-btn{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;border-radius:999px;color:var(--brand);background:var(--brand-soft);flex:none;transition:background .15s}
+.loc-btn:hover{background:var(--brand);color:#fff}
+.loc-btn .ic{width:15px;height:15px}
+.is-brief .broken:not(.is-open){padding:16px 20px 18px}
+.is-brief .broken:not(.is-open) .broken-top{margin-bottom:12px}
+.is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start}
+.is-brief .broken:not(.is-open) .kv dd{display:flex;align-items:center;min-height:28px;flex-wrap:wrap}
+.broken.is-open .loc-btn{vertical-align:middle}
 </style>
 <style>
 /* Layout: icon rail · top status bar · live map stage · event/route side panel; decisions open as a drawer over the map edge */
@@ -836,7 +855,6 @@ body{background:var(--canvas)}
     </div>
     <div class="kpis" id="kpis"></div>
     <div class="tb-right">
-      <div class="dens" role="group" aria-label="Детализация карточек" title="Детализация карточек · клавиша D"><button data-dens="brief" aria-pressed="true">Кратко</button><button data-dens="full" aria-pressed="false">Подробно</button></div>
       <label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label>
       <div class="clock"><b id="clock">--:--:--</b><span id="dateLine"></span></div>
     </div>
@@ -848,13 +866,16 @@ body{background:var(--canvas)}
     <div class="overlay-tl">
       <button class="chipbtn" id="tgStops" aria-pressed="true"><span data-ic="pin"></span>Остановки</button>
       <button class="chipbtn" id="tgReserve" aria-pressed="true"><span data-ic="bus"></span>Резерв</button>
+      <div class="lg-wrap">
+        <button class="chipbtn lg-btn" id="tgLegend" aria-expanded="false" aria-controls="legend"><span class="lg-dots"><i class="sdot ok"></i><i class="sdot warn"></i><i class="sdot late"></i><i class="sdot crit"></i></span>Статус ТС<span data-ic="chevd"></span></button>
+        <div class="legend" id="legend" hidden></div>
+      </div>
       <button class="chipbtn route-filter" id="routeFilter" hidden></button>
     </div>
     <div class="overlay-tr">
       <div class="basemap-sw" role="group" aria-label="Подложка">
         <button id="bmSchema" aria-pressed="true" title="Собственная схема сети маршрутов">Схема</button>
-        <button id="bmMin" aria-pressed="false" disabled title="Яндекс Карты загружаются…">Минимум</button>
-        <button id="bmFull" aria-pressed="false" disabled title="Яндекс Карты загружаются…">Подробно</button>
+        <button id="bmMin" aria-pressed="false" disabled title="Яндекс Карты загружаются…">Карта</button>
       </div>
       <div class="mapctl">
         <button id="zIn" aria-label="Приблизить" title="Приблизить"><span data-ic="plus"></span></button>
@@ -863,8 +884,7 @@ body{background:var(--canvas)}
       </div>
     </div>
     <div class="alert" id="alert" hidden role="alert"></div>
-    <div class="legend" id="legend"></div>
-    <div class="scen" id="scen">
+    <div class="scen" id="scen" hidden>
       <span class="scen-tag">Демо</span>
       <div class="scen-steps" id="scenSteps"></div>
       <span class="scen-sep"></span>
@@ -1236,13 +1256,12 @@ function restyleBase(){ baseShapes.forEach(([l,f])=>l.setStyle(f())); }
 let ymap = null, ymLayer = null, ymOK = false, baseMode = 'schema', geoReal = !!REAL, pendingGeo = null;
 let candRoutes = {}, candLocked = false;
 const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
+/* Упрощённая версия: только дороги и названия улиц — без зданий, заливок, воды, парков и подписей объектов */
 const YM_MINIMAL = [
-  {tags:{any:['poi','shopping','food_and_drink','medical','sports_ground','major_landmark','outdoor','cemetery','beach','airport','government','education','entertainment','fuel_station','car_park','service']}, elements:'label', stylers:[{visibility:'off'}]},
-  {tags:{any:['transit','transit_location','transit_stop','transit_line','transit_entrance','railway_station','metro_entrance']}, elements:'label', stylers:[{visibility:'off'}]},
-  {tags:{any:['address','entrance','traffic_light','road_marking','crosswalk','fence','structure','is_unclassified_transit']}, stylers:[{visibility:'off'}]},
-  {tags:{any:['building']}, elements:'geometry', stylers:[{opacity:0.45}]},
+  {tags:{none:['road']}, elements:'geometry', stylers:[{visibility:'off'}]},
+  {tags:{none:['road']}, elements:'label', stylers:[{visibility:'off'}]},
   {tags:{any:['road']}, elements:'label', stylers:[{zoom:[0,13.5], visibility:'off'}]},
-  {elements:'geometry', stylers:[{saturation:-0.55}]},
+  {tags:{any:['road']}, elements:'geometry', stylers:[{saturation:-0.6}]},
   {elements:'label.text', stylers:[{opacity:0.75}]}
 ];
 let ymVer = 0;
@@ -1274,15 +1293,15 @@ function initYandex21(){
 }
 function yandexReady(note){
   ymOK = true;
-  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=false; b.title=note; });
+  ['#bmMin'].forEach(id=>{ const b=$(id); b.disabled=false; b.title=note; });
   map.on('move zoom resize', syncYandex);
   let pref = 'min'; try{ pref = localStorage.getItem('st-basemap') || 'min'; }catch(e){}
-  setBasemap(['schema','min','full'].includes(pref) ? pref : 'min');
+  setBasemap(['schema','min'].includes(pref) ? pref : 'min');
 }
 function ymFail(e){
   const msg = (e && (e.message || e.toString && e.toString())) || String(e);
   console.warn('Яндекс Карты недоступны, используется схема:', e);
-  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=true; b.title='Яндекс Карты недоступны: ' + msg; });
+  ['#bmMin'].forEach(id=>{ const b=$(id); b.disabled=true; b.title='Яндекс Карты недоступны: ' + msg; });
   if(!/ключ не задан/.test(msg)) toast(`Яндекс Карты не загрузились: ${msg.replace(/[<>]/g,'').slice(0,140)}`);
 }
 const ymTheme = () => isDark() ? 'dark' : 'light';
@@ -1304,6 +1323,7 @@ function initYandex(){
 }
 /* Легенда стоит над кнопкой «Открыть Яндекс Карты» и выровнена с ней по левому краю */
 function placeLegend(){
+  return true; /* в упрощённой версии легенда — выпадашка у кнопки «Статус ТС» */
   const lg = $('#legend'), stage = $('#stage');
   if(baseMode==='schema'){ lg.style.left=''; lg.style.bottom=''; return true; }
   const sr = stage.getBoundingClientRect();
@@ -1334,7 +1354,7 @@ function themeYandex(){ if(!ymap || ymVer!==3) return; try{ ymap.update({theme: 
 function setBasemap(mode){
   baseMode = (mode!=='schema' && ymOK) ? mode : 'schema';
   const y = baseMode!=='schema';
-  $('#bmSchema').setAttribute('aria-pressed', !y); $('#bmMin').setAttribute('aria-pressed', baseMode==='min'); $('#bmFull').setAttribute('aria-pressed', baseMode==='full');
+  $('#bmSchema').setAttribute('aria-pressed', !y); $('#bmMin').setAttribute('aria-pressed', baseMode==='min');
   $('#stage').classList.toggle('on-yandex', y);
   if(y){
     if(ymVer===3){ try{ ymLayer.update({customization: baseMode==='min' ? YM_MINIMAL : []}); }catch(e){} }
@@ -1600,15 +1620,8 @@ function renderRoutes(){
 $('#rlist').addEventListener('click', e=>{ const row=e.target.closest('[data-r]'); if(row) selectRoute(row.dataset.r); });
 $('#routeFilter').addEventListener('click', ()=> selectRoute(selRoute));
 
-/* ---------- детализация: кратко / подробно ---------- */
-let dens = 'brief'; try{ dens = localStorage.getItem('st-dens') || 'brief'; }catch(e){}
-function setDens(d){
-  dens = d; document.body.classList.toggle('is-brief', d==='brief');
-  $$('[data-dens]').forEach(b=> b.setAttribute('aria-pressed', b.dataset.dens===d));
-  try{ localStorage.setItem('st-dens', d); }catch(e){}
-}
-$$('[data-dens]').forEach(b=> b.addEventListener('click', ()=> setDens(b.dataset.dens)));
-setDens(dens);
+/* ---------- упрощённая версия: карточки всегда краткие, подробности по раскрытию ---------- */
+const dens = 'brief'; document.body.classList.add('is-brief');
 
 /* ---------- tabs ---------- */
 $$('.tab').forEach(t=> t.addEventListener('click', ()=>{ $$('.tab').forEach(x=>x.setAttribute('aria-selected', x===t)); $('#p-feed').hidden = t.dataset.tab!=='feed'; $('#p-routes').hidden = t.dataset.tab!=='routes'; }));
@@ -1815,7 +1828,7 @@ function renderDecision(){
       <div class="broken" id="broken">
         <div class="broken-top"><span class="broken-id">${b.id}</span><span class="sub">${b.plate}<br>${b.model} · ${b.cap} мест</span><span class="chip crit">Сход с линии</span><button class="more-btn" data-act="more" aria-expanded="false">Подробнее${ic('chevd')}</button></div>
         <dl class="kv">
-          <div class="wide"><dt>Где</dt><dd>${addr(inc)} <button class="btn btn-ghost" style="height:26px;padding:0 8px;font-size:12px;margin-left:6px;vertical-align:1px" data-act="show">${ic('target')}На карте</button><small>${inc.ll[0].toFixed(5)}, ${inc.ll[1].toFixed(5)} · в сторону «${dirTo()}»</small></dd></div>
+          <div class="wide"><dt>Где</dt><dd>${addr(inc)}<button class="loc-btn" data-act="show" title="Показать на карте" aria-label="Показать на карте">${ic('target')}</button><small>${inc.ll[0].toFixed(5)}, ${inc.ll[1].toFixed(5)} · в сторону «${dirTo()}»</small></dd></div>
           <div><dt>Когда</dt><dd class="num">${hhmmss(new Date(inc.t0))}</dd></div>
           <div class="more"><dt>Причина</dt><dd>Перегрев двигателя<small>t° ОЖ 118 °C · код P0217</small></dd></div>
           <div><dt>В салоне</dt><dd class="num">≈ ${b.pax}</dd></div>
@@ -2024,7 +2037,7 @@ document.addEventListener('keydown', e=>{
   if(tag==='input' && e.target.type==='text'){ if(e.key==='Escape') e.target.blur(); return; }
   if(!$('#ux').hidden){ if(e.key==='Escape') closeUX(); return; }
   if(e.key==='/' ){ e.preventDefault(); $('#search').focus(); return; }
-  if((e.key==='d'||e.key==='D'||e.key==='в'||e.key==='В') && !e.ctrlKey && !e.metaKey && !e.altKey){ setDens(dens==='brief'?'full':'brief'); return; }
+  if((e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') && !e.ctrlKey && !e.metaKey && !e.altKey){ resetScenario(); return; }
   if(e.key==='Escape'){ if($('#drawer').classList.contains('is-open')) closeDrawer(); else if(selRoute) selectRoute(selRoute); return; }
   if(e.key==='Enter'){
     if(e.target.closest && e.target.closest('button') && !e.target.closest('[data-primary]')) return;
@@ -2048,13 +2061,15 @@ $('#search').addEventListener('keydown', e=>{
 
 /* toggles */
 $('#tgStops').addEventListener('click', e=>{ const b=e.currentTarget; const on = b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); if(on) map.addLayer(L_.stops); else map.removeLayer(L_.stops); });
+function toggleLegend(on){ const b=$('#tgLegend'); on = on ?? b.getAttribute('aria-expanded')!=='true'; b.setAttribute('aria-expanded', on); $('#legend').hidden = !on; }
+$('#tgLegend').addEventListener('click', e=>{ e.stopPropagation(); toggleLegend(); });
+document.addEventListener('click', e=>{ if(!e.target.closest('.lg-wrap')) toggleLegend(false); });
 $('#tgReserve').addEventListener('click', e=>{ const b=e.currentTarget; const on = b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); if(on) map.addLayer(L_.res); else map.removeLayer(L_.res); });
 $('#zIn').addEventListener('click', ()=>map.zoomIn(.75));
 $('#zOut').addEventListener('click', ()=>map.zoomOut(.75));
 $('#zFit').addEventListener('click', ()=>fitCity(true));
 $('#bmSchema').addEventListener('click', ()=>setBasemap('schema'));
 $('#bmMin').addEventListener('click', ()=>setBasemap('min'));
-$('#bmFull').addEventListener('click', ()=>setBasemap('full'));
 $$('[data-stub]').forEach(b=>b.addEventListener('click', ()=>toast('Раздел вне рамок прототипа: показаны экраны «Карта» и «Замена»')));
 $('#railInc').addEventListener('click', ()=>{ if(state==='incident'||state==='deciding') openDecision(); else if(state==='assigned') openDrawer(); else toast('Активных инцидентов нет'); });
 
@@ -2123,11 +2138,11 @@ function renderUX(){
     <div class="grid2">
       <div class="card"><h5>Ночная смена</h5><ul><li>Тёмная тема без чистого чёрного и белого: графит с лёгким фиолетовым оттенком.</li><li>Подложка карты приглушена, данные контрастнее фона.</li><li>Анимация только у критичных объектов, звук можно выключить одной кнопкой.</li></ul></div>
       <div class="card"><h5>Мгновенное чтение данных</h5><ul><li>Номера, время и отклонения набраны моноширинным шрифтом с цифрами одной ширины: при обновлении цифры не прыгают.</li><li>Отклонения со знаком: <span class="num">+7:10</span>, <span class="num">−1:04</span>.</li><li>Номер маршрута прямо на маркере, номер борта — по нажатию.</li></ul></div>
-      <div class="card"><h5>Кратко и подробно</h5><ul><li>По умолчанию карточки краткие: номер борта, время доезда, доступность и только те бейджи, где что-то не в норме.</li><li>Раскрывается то, с чем диспетчер работает: выбранный резерв, выбранный маршрут, событие по клику, «Подробнее» у сломанного борта и в окне автобуса.</li><li>«Подробно» в верхней панели (или клавиша D) показывает всё сразу.</li></ul></div>
+      <div class="card"><h5>Сначала главное</h5><ul><li>Карточки краткие: номер борта, время доезда, доступность и только те бейджи, где что-то не в норме.</li><li>Раскрывается то, с чем диспетчер работает: выбранный резерв, выбранный маршрут, событие по клику, «Подробнее» у сломанного борта и в окне автобуса.</li><li>Легенда статусов свёрнута в кнопку над картой, у карты два вида: «Схема» и «Карта» (только дороги).</li></ul></div>
       <div class="card"><h5>Защита от ошибок</h5><ul><li>Недоступные кандидаты нельзя выбрать, причина указана.</li><li>После назначения 10 секунд на отмену, без модальных «Вы уверены?».</li><li>Каждое действие попадает в ленту смены с временем.</li></ul></div>
     </div>
     <div class="grid2" style="margin-top:16px">
-      <div class="card"><h5>Горячие клавиши</h5><div class="keys"><span class="kbd">Enter</span><span>Решить аварию / назначить выбранный борт</span><span class="kbd">1–4</span><span>Выбрать кандидата в окне замены</span><span class="kbd">D</span><span>Переключить «Кратко / Подробно»</span><span class="kbd">Esc</span><span>Закрыть панель, снять выделение маршрута</span><span class="kbd">/</span><span>Поиск по борту, маршруту или остановке</span></div></div>
+      <div class="card"><h5>Горячие клавиши</h5><div class="keys"><span class="kbd">Enter</span><span>Решить аварию / назначить выбранный борт</span><span class="kbd">1–4</span><span>Выбрать кандидата в окне замены</span><span class="kbd">R</span><span>Перезапустить демо-сценарий</span><span class="kbd">Esc</span><span>Закрыть панель, снять выделение маршрута</span><span class="kbd">/</span><span>Поиск по борту, маршруту или остановке</span></div></div>
       <div class="card"><h5>Допущения прототипа</h5><ul><li>Трассы и остановки маршрута 10 и шести соседних взяты с bus62.ru. Бортовые номера, водители, резерв и отклонения от графика смоделированы.</li><li>Подложка — Яндекс Карты (JS API 3.0). В режиме «Минимум» скрыты организации, транспорт Яндекса, адреса и разметка: остаются улицы, вода, парки и здания. Без доступа к API показывается собственная схема сети маршрутов.</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
     </div>
   </section>
