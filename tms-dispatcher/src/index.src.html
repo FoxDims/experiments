@@ -1237,16 +1237,25 @@ function initYandex(){
 /* Легенда стоит над кнопкой «Открыть Яндекс Карты» и выровнена с ней по левому краю */
 function placeLegend(){
   const lg = $('#legend'), stage = $('#stage');
-  if(baseMode==='schema'){ lg.style.left=''; lg.style.bottom=''; return; }
-  const cand = [...$('#ymap').querySelectorAll('a,button,[role="button"]')].filter(el=>/Яндекс\s*Карт/i.test(el.textContent||'') && el.getBoundingClientRect().width>0 && el.getBoundingClientRect().width<320);
-  if(!cand.length) return false;
-  const r = cand.sort((a,b)=>a.getBoundingClientRect().left-b.getBoundingClientRect().left)[0].getBoundingClientRect(), sr = stage.getBoundingClientRect();
-  if(r.top < sr.top + sr.height/2) return false;
+  if(baseMode==='schema'){ lg.style.left=''; lg.style.bottom=''; return true; }
+  const sr = stage.getBoundingClientRect();
+  // кнопка Яндекса: любой элемент с текстом «Открыть … Яндекс Карт…» в нижней половине карты; берём саму «пилюлю» (самый крупный элемент высотой до 48 px)
+  const hits = [...$('#ymap').querySelectorAll('*')].filter(el=>{ const t=(el.textContent||'').trim(); if(!/Яндекс\s*Карт/i.test(t) || t.length>60) return false; const r=el.getBoundingClientRect(); return r.width>0 && r.height>0 && r.height<=48 && r.top>sr.top+sr.height/2; });
+  if(!hits.length) return false;
+  const pillEl = hits.reduce((a,b)=>{ const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(); return rb.width*rb.height>ra.width*ra.height ? b : a; });
+  const r = pillEl.getBoundingClientRect();
+  if(r.left > sr.left + sr.width/2) return false;
   lg.style.left = Math.round(r.left - sr.left) + 'px';
   lg.style.bottom = Math.round(sr.bottom - r.top + 8) + 'px';
   return true;
 }
-function watchLegend(){ let n=0; const t=setInterval(()=>{ if(placeLegend() || ++n>40) clearInterval(t); }, 250); }
+let legendObs = null;
+function watchLegend(){
+  placeLegend();
+  if(legendObs) return;
+  legendObs = new MutationObserver(()=>{ clearTimeout(legendObs._t); legendObs._t = setTimeout(placeLegend, 120); });
+  legendObs.observe($('#ymap'), {childList:true, subtree:true});
+}
 window.addEventListener('resize', ()=>setTimeout(placeLegend, 200));
 function syncYandex(){
   if(!ymap) return; const c = map.getCenter();
