@@ -957,17 +957,24 @@ function loadYandex(){
   document.head.appendChild(s);
 }
 function ymFail(e){
+  const msg = (e && (e.message || e.toString && e.toString())) || String(e);
   console.warn('Яндекс Карты недоступны, используется схема:', e);
-  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=true; b.title='Яндекс Карты недоступны: проверьте ключ и разрешённые домены'; });
+  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=true; b.title='Яндекс Карты недоступны: ' + msg; });
+  toast(`Яндекс Карты не загрузились: ${msg.replace(/[<>]/g,'').slice(0,140)}`);
 }
 const ymTheme = () => isDark() ? 'dark' : 'light';
 function initYandex(){
+  const {YMap, YMapDefaultSchemeLayer} = ymaps3;
+  const c = map.getCenter();
+  const loc = {center:[c.lng, c.lat], zoom:Math.round(map.getZoom())};
   try{
-    const {YMap, YMapDefaultSchemeLayer} = ymaps3;
-    const c = map.getCenter();
     ymLayer = new YMapDefaultSchemeLayer({customization: YM_MINIMAL, theme: ymTheme()});
-    ymap = new YMap($('#ymap'), {location:{center:[c.lng, c.lat], zoom:map.getZoom()}, behaviors:[], theme: ymTheme(), zoomRounding:'smooth'}, [ymLayer]);
-  }catch(e){ ymFail(e); return; }
+    ymap = new YMap($('#ymap'), {location:loc, behaviors:[], theme: ymTheme(), zoomRounding:'smooth'}, [ymLayer]);
+  }catch(e){
+    console.warn('JS API 3.0: стиль или тема не приняты, запускаю без них', e);
+    try{ $('#ymap').innerHTML=''; ymLayer = new YMapDefaultSchemeLayer({}); ymap = new YMap($('#ymap'), {location:loc, behaviors:[]}, [ymLayer]); }
+    catch(e2){ ymFail(e2); return; }
+  }
   ymOK = true;
   ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=false; b.title=''; });
   map.on('move zoom', syncYandex);
