@@ -1505,22 +1505,22 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .avatar .tip{z-index:20;box-shadow:var(--shadow-s);position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--surface);font-size:12px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
 .avatar:hover .tip,.avatar:focus-visible .tip{opacity:1}
 
-.topbar .kpis{display:flex;gap:0;margin:14px 14px 0;padding:10px 4px;background:var(--surface-2);border-radius:18px;flex:none}
-.topbar .kpi{flex:1 1 auto;min-width:0!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:0;border-left:1px solid var(--line)!important;display:flex;flex-direction:column;gap:2px;animation:none}
-.topbar .kpi:first-child{border-left:0!important}
-.topbar .kpi-l{font-size:10.5px;letter-spacing:0;color:var(--text-3)!important;gap:5px}
-.topbar .kpi-l .sdot{width:6px;height:6px;margin:0}
-.topbar .kpi-v{font-size:17px;font-weight:700;color:var(--text)!important;line-height:1.15}
-.topbar .kpi-v small,.topbar .kpi-v .dim{font-size:11px!important;color:var(--text-3)!important}
-.topbar .kpi.k-reg{display:grid;grid-template-columns:auto auto;column-gap:6px;align-items:end}
-.topbar .kpi.k-reg .kpi-l{grid-column:1/3}
-.topbar .kpi.k-reg .kpi-v{color:var(--brand)!important}
-.topbar .kpi.k-reg .spark{width:36px;height:16px;margin-bottom:3px}
-.topbar .kpi .spark path:first-child{fill:var(--brand-soft)}
-.topbar .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
-.topbar .kpi .spark circle{fill:var(--brand);stroke:none}
-.topbar .kpi.is-crit .kpi-v{color:var(--crit)!important}
-.topbar .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
+.kpi-dock .kpis{display:flex;gap:0;margin:14px 14px 0;padding:10px 4px;background:var(--surface-2);border-radius:18px;flex:none}
+.kpi-dock .kpi{flex:1 1 auto;min-width:0!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:0;border-left:1px solid var(--line)!important;display:flex;flex-direction:column;gap:2px;animation:none}
+.kpi-dock .kpi:first-child{border-left:0!important}
+.kpi-dock .kpi-l{font-size:10.5px;letter-spacing:0;color:var(--text-3)!important;gap:5px}
+.kpi-dock .kpi-l .sdot{width:6px;height:6px;margin:0}
+.kpi-dock .kpi-v{font-size:17px;font-weight:700;color:var(--text)!important;line-height:1.15}
+.kpi-dock .kpi-v small,.kpi-dock .kpi-v .dim{font-size:11px!important;color:var(--text-3)!important}
+.kpi-dock .kpi.k-reg{display:grid;grid-template-columns:auto auto;column-gap:6px;align-items:end}
+.kpi-dock .kpi.k-reg .kpi-l{grid-column:1/3}
+.kpi-dock .kpi.k-reg .kpi-v{color:var(--brand)!important}
+.kpi-dock .kpi.k-reg .spark{width:36px;height:16px;margin-bottom:3px}
+.kpi-dock .kpi .spark path:first-child{fill:var(--brand-soft)}
+.kpi-dock .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
+.kpi-dock .kpi .spark circle{fill:var(--brand);stroke:none}
+.kpi-dock .kpi.is-crit .kpi-v{color:var(--crit)!important}
+.kpi-dock .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
 @keyframes kpiDot{50%{box-shadow:0 0 0 4px var(--crit-soft)}}
 
 /* ---- lite: шапка окна замены без строки инцидента; компактный сломанный борт ---- */
@@ -1535,21 +1535,21 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .is-brief .broken:not(.is-open) .loc-btn{width:24px;height:24px}
 .broken{border-radius:18px}
 
-.topbar .kpis{margin:12px 12px 0;padding:10px 2px}
-.topbar .kpi{flex:1 1 auto;padding:0 7px!important}
-.topbar .kpi:first-child{padding-left:10px!important}
-.topbar .kpi:last-child{padding-right:10px!important}
-.topbar .kpi-l{font-size:10px;white-space:nowrap}
-.topbar .kpi-v{font-size:16px}
-.topbar .kpi-v small{letter-spacing:-.02em}
-.topbar .kpi.k-reg .spark{width:30px;height:14px}
+.kpi-dock .kpis{margin:12px 12px 0;padding:10px 2px}
+.kpi-dock .kpi{flex:1 1 auto;padding:0 7px!important}
+.kpi-dock .kpi:first-child{padding-left:10px!important}
+.kpi-dock .kpi:last-child{padding-right:10px!important}
+.kpi-dock .kpi-l{font-size:10px;white-space:nowrap}
+.kpi-dock .kpi-v{font-size:16px}
+.kpi-dock .kpi-v small{letter-spacing:-.02em}
+.kpi-dock .kpi.k-reg .spark{width:30px;height:14px}
 .is-brief .broken:not(.is-open){padding:10px 16px}
 .is-brief .broken:not(.is-open) .broken-top{margin-bottom:4px}
 .is-brief .broken:not(.is-open) .broken-top .chip{height:22px}
 .is-brief .broken:not(.is-open) .kv dd{min-height:24px}
 
 /* показатели в топбаре: ширина и правый край — как у правой колонки */
-.topbar .kpis{grid-column:4;margin:0!important;width:100%;box-sizing:border-box;background:var(--surface);box-shadow:var(--shadow-s);border:1px solid var(--line);align-self:center}
+.kpi-dock .kpis{grid-column:4;margin:0!important;width:100%;box-sizing:border-box;background:var(--surface);box-shadow:var(--shadow-s);border:1px solid var(--line);align-self:center}
 
 /* ---- lite: окно замены шириной с правую колонку ---- */
 .app{--drawer-w:var(--side-w)}
@@ -1608,16 +1608,16 @@ body:not(.is-brief) .bp-h .chip{display:none}
 
 /* ---- lite: топбар — показатели слева (крупно), поиск в середине, пользователь справа ---- */
 .topbar{display:flex!important;align-items:center;gap:20px;padding:0 0 0 6px}
-.topbar .kpis{grid-column:auto;width:auto;flex:none;padding:10px 4px;border-radius:20px}
-.topbar .kpi{flex:none;padding:0 18px!important;gap:3px}
-.topbar .kpi:first-child{padding-left:18px!important}
-.topbar .kpi:last-child{padding-right:18px!important}
-.topbar .kpi-l{font-size:12px;gap:6px}
-.topbar .kpi-l .sdot{width:7px;height:7px}
-.topbar .kpi-v{font-size:22px;line-height:1.1}
-.topbar .kpi-v small,.topbar .kpi-v .dim{font-size:14px!important}
-.topbar .kpi.k-reg{column-gap:10px}
-.topbar .kpi.k-reg .spark{width:56px;height:20px;margin-bottom:4px}
+.kpi-dock .kpis{grid-column:auto;width:auto;flex:none;padding:10px 4px;border-radius:20px}
+.kpi-dock .kpi{flex:none;padding:0 18px!important;gap:3px}
+.kpi-dock .kpi:first-child{padding-left:18px!important}
+.kpi-dock .kpi:last-child{padding-right:18px!important}
+.kpi-dock .kpi-l{font-size:12px;gap:6px}
+.kpi-dock .kpi-l .sdot{width:7px;height:7px}
+.kpi-dock .kpi-v{font-size:22px;line-height:1.1}
+.kpi-dock .kpi-v small,.kpi-dock .kpi-v .dim{font-size:14px!important}
+.kpi-dock .kpi.k-reg{column-gap:10px}
+.kpi-dock .kpi.k-reg .spark{width:56px;height:20px;margin-bottom:4px}
 .topbar .tb-right{flex:1;justify-content:center;min-width:0;margin:0}
 .topbar .search{width:100%;max-width:420px}
 .tb-user{display:flex;align-items:center;gap:12px;flex:none;padding:6px 18px 6px 6px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-s)}
@@ -1626,13 +1626,46 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .tb-user-t b{font-size:14px;font-weight:600;white-space:nowrap}
 .tb-user-t span{font-size:12px;color:var(--text-3);white-space:nowrap}
 @media (max-width:1440px){
-  .topbar .kpi{padding:0 12px!important}
-  .topbar .kpi:first-child{padding-left:14px!important}
-  .topbar .kpi:last-child{padding-right:14px!important}
-  .topbar .kpi-v{font-size:19px}
-  .topbar .kpi.k-reg .spark{width:40px}
+  .kpi-dock .kpi{padding:0 12px!important}
+  .kpi-dock .kpi:first-child{padding-left:14px!important}
+  .kpi-dock .kpi:last-child{padding-right:14px!important}
+  .kpi-dock .kpi-v{font-size:19px}
+  .kpi-dock .kpi.k-reg .spark{width:40px}
   .tb-user-t span{display:none}
 }
+
+/* ---- lite: без топбара — карта и правые панели на всю высоту; поиск сверху, показатели снизу по центру карты ---- */
+.topbar{display:none!important}
+.app{grid-template-rows:minmax(0,1fr);padding:12px 12px 12px 0}
+.rail,.stage,.side{grid-row:1}
+.drawer{top:12px}
+.search-top{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:550;width:420px;max-width:calc(100% - 340px)}
+.search-top .search{width:100%;height:44px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
+.kpi-dock{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:550;max-width:calc(100% - 32px);transition:bottom .2s}
+.stage.on-yandex .kpi-dock{bottom:44px}
+.kpi-dock .kpis{display:flex;padding:10px 4px;border-radius:22px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:var(--shadow);margin:0!important;width:auto}
+.kpi-dock .kpi{border-left:1px solid var(--line)!important;background:none!important;box-shadow:none!important;border-radius:0;min-width:0!important;display:flex;flex-direction:column;animation:none}
+.kpi-dock .kpi:first-child{border-left:0!important}
+.kpi-dock .kpi-l{color:var(--text-3)!important;letter-spacing:0;white-space:nowrap}
+.kpi-dock .kpi-v{font-weight:700;color:var(--text)!important}
+.kpi-dock .kpi.k-reg{display:grid;grid-template-columns:auto auto;align-items:end}
+.kpi-dock .kpi.k-reg .kpi-l{grid-column:1/3}
+.kpi-dock .kpi.k-reg .kpi-v{color:var(--brand)!important}
+.kpi-dock .kpi .spark path:first-child{fill:var(--brand-soft)}
+.kpi-dock .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
+.kpi-dock .kpi .spark circle{fill:var(--brand);stroke:none}
+.kpi-dock .kpi.is-crit .kpi-v{color:var(--crit)!important}
+.kpi-dock .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
+.alert{top:72px}
+.toast{bottom:112px}
+.stage.on-yandex .toast{bottom:140px}
+.avatar .user-tip{display:flex;flex-direction:column;gap:2px;line-height:1.3;bottom:0;top:auto;transform:none;padding:8px 12px}
+.avatar .user-tip b{font-size:13px}
+.avatar .user-tip span{font-size:11.5px;opacity:.75}
+/* на экранах уже ~1800 px кнопки слоёв опускаются под поиск, чтобы не наезжать */
+@media (max-width:1800px){ .overlay-tl{top:72px} .alert{top:128px} }
+.dz-foot:not(:has(.dz-note)){flex-wrap:nowrap}
+@media (max-width:1440px){ .dz-foot .kbd{display:none} }
 </style>
 </head>
 <body>
@@ -1658,21 +1691,17 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <button class="rail-btn" id="uxBtn"><span data-ic="book"></span><span class="tip">UX-логика прототипа</span></button>
     <button class="rail-btn" id="soundBtn" aria-pressed="true"><span data-ic="volume"></span><span class="tip">Звук аварий: вкл</span></button>
     <button class="rail-btn" id="themeBtn"><span data-ic="moon"></span><span class="tip">Сменить тему</span></button>
+    <div class="avatar" tabindex="0" aria-describedby="userTip">АМ<span class="tip user-tip" id="userTip" role="tooltip"><b>Морозова А. С.</b><span id="shiftLine">Старший диспетчер</span></span></div>
   </nav>
 
-  <header class="topbar">
-    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
-    <h1 class="sr">Оперативная обстановка</h1>
-    <div class="tb-right">
-      <label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label>
-      <div class="clock"><b id="clock">--:--:--</b><span id="dateLine"></span></div>
-    </div>
-    <div class="tb-user"><div class="avatar" aria-hidden="true">АМ</div><div class="tb-user-t"><b>Морозова А. С.</b><span id="shiftLine">Старший диспетчер</span></div></div>
-  </header>
+  <h1 class="sr">Оперативная обстановка</h1>
 
   <main class="stage" id="stage">
     <div id="ymap" aria-hidden="true"></div>
     <div id="map" aria-label="Карта Рязани с движением автобусов"></div>
+    <div class="search-top"><label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label></div>
+    <div class="kpi-dock"><div class="kpis" id="kpis" aria-label="Показатели смены"></div></div>
+    <div class="clock" hidden><b id="clock">--:--:--</b><span id="dateLine"></span></div>
     <div class="overlay-tl">
       <button class="chipbtn" id="tgStops" aria-pressed="true"><span data-ic="pin"></span>Остановки</button>
       <button class="chipbtn" id="tgReserve" aria-pressed="true"><span data-ic="bus"></span>Резерв</button>
@@ -2839,7 +2868,7 @@ function uiTick(){
   if(assignAnim){ $$('[data-eta]').forEach(el=> el.textContent = mmss(assignAnim.leftReal)); $$('[data-bar]').forEach(el=> el.style.width = Math.round(assignAnim.progress*100)+'%'); }
   Object.values(buses).forEach(b=>{ if(b.state==='line' && !b.fixedDev) b.dev = clamp(b.dev + (Math.random()-.5)*6, -110, 110); });
 }
-function shiftLine(){ const h = new Date().getHours(); const sh = h>=6&&h<14 ? 'утренняя смена' : h>=14&&h<22 ? 'вечерняя смена' : 'ночная смена'; $('#shiftLine').textContent = `Старший диспетчер · ${sh}`; $('.tb-user').title = `Рязань · ${sh}`; }
+function shiftLine(){ const h = new Date().getHours(); const sh = h>=6&&h<14 ? 'утренняя смена' : h>=14&&h<22 ? 'вечерняя смена' : 'ночная смена'; $('#shiftLine').textContent = `Старший диспетчер · ${sh} · Рязань`; }
 
 /* ================= reset ================= */
 function resetScenario(){
