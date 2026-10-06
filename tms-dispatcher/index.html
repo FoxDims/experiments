@@ -690,6 +690,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --m-land:#E8EAEE; --m-urban:#E1E4E9; --m-water:#C6D5E5; --m-park:#D8E4D3; --m-meadow:#E2EADB;
   --m-road:#FFFFFF; --m-case:#D0D4DC; --m-minor:#F3F4F7; --m-rail:#B4BAC6; --m-label:#8A91A1;
   --m-route:#8F98AC; --m-stop:#FFFFFF;
+  --ym21-filter:none; --ym21-filter-min:saturate(.2) contrast(.9) brightness(1.04); --ym21-veil:.42;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -708,6 +709,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
     --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
     --m-route:#4C5569; --m-stop:#12151C;
+    --ym21-filter:invert(1) hue-rotate(180deg) saturate(.5) brightness(.85) contrast(.9); --ym21-filter-min:invert(1) hue-rotate(180deg) saturate(.15) brightness(.75) contrast(.85); --ym21-veil:.45;
     color-scheme:dark;
   }
 }
@@ -726,6 +728,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
   --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
   --m-route:#4C5569; --m-stop:#12151C;
+  --ym21-filter:invert(1) hue-rotate(180deg) saturate(.5) brightness(.85) contrast(.9); --ym21-filter-min:invert(1) hue-rotate(180deg) saturate(.15) brightness(.75) contrast(.85); --ym21-veil:.45;
   color-scheme:dark;
 }
 
@@ -865,6 +868,11 @@ button{cursor:pointer;background:none;border:0;padding:0}
 #ymap{position:absolute;inset:0;pointer-events:none}
 .stage.on-yandex #map,.stage.on-yandex .leaflet-container{background:transparent}
 .stage.on-yandex .legend,.stage.on-yandex .scen{bottom:40px}
+/* запасной JS API 2.1: стилизации нет, поэтому «Минимум» — обесцвечивание и вуаль цвета фона, тёмная тема — инверсия */
+#ymap::after{content:"";position:absolute;inset:0;background:var(--m-land);opacity:0;pointer-events:none;z-index:1;transition:opacity .2s}
+.stage.ym21.ym-min #ymap::after{opacity:var(--ym21-veil)}
+.stage.ym21 #ymap [class*="ground-pane"]{filter:var(--ym21-filter)}
+.stage.ym21.ym-min #ymap [class*="ground-pane"]{filter:var(--ym21-filter-min)}
 
 /* leaflet popup = bus card */
 .leaflet-popup.bus-pop .leaflet-popup-content-wrapper{background:var(--surface);color:var(--text);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--line);padding:0}
@@ -1607,15 +1615,39 @@ const YM_MINIMAL = [
   {elements:'geometry', stylers:[{saturation:-0.55}]},
   {elements:'label.text', stylers:[{opacity:0.75}]}
 ];
+let ymVer = 0;
+const loadScript = src => new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.async = true; el.onload = res; el.onerror = () => rej(new Error('скрипт не загрузился')); document.head.appendChild(el); });
+/* Сначала JS API 3.0 (полноценный «Минимум»), при отказе — запасной JS API 2.1 */
 function loadYandex(){
   const key = (window.ST_CONFIG||{}).yandexApiKey;
   if(!key){ ymFail('ключ не задан (config.js)'); return; }
-  const s = document.createElement('script');
-  s.src = `https://api-maps.yandex.ru/v3/?apikey=${encodeURIComponent(key)}&lang=ru_RU`;
-  s.async = true;
-  s.onload = () => { if(window.ymaps3) ymaps3.ready.then(initYandex, ymFail); else ymFail('ymaps3 не определён'); };
-  s.onerror = () => ymFail('скрипт не загрузился');
-  document.head.appendChild(s);
+  const k = encodeURIComponent(key);
+  loadScript(`https://api-maps.yandex.ru/v3/?apikey=${k}&lang=ru_RU`)
+    .then(() => { if(!window.ymaps3) throw new Error('ymaps3 не определён'); return ymaps3.ready; })
+    .then(initYandex)
+    .catch(e3 => {
+      console.warn('JS API 3.0 недоступен, пробую 2.1:', e3);
+      return loadScript(`https://api-maps.yandex.ru/2.1/?apikey=${k}&lang=ru_RU`)
+        .then(() => new Promise((res, rej) => { if(!window.ymaps) return rej(new Error('ymaps не определён')); ymaps.ready(res, rej); }))
+        .then(initYandex21)
+        .catch(e2 => ymFail(`3.0: ${e3 && e3.message || e3}; 2.1: ${e2 && e2.message || e2}`));
+    });
+}
+function initYandex21(){
+  const c = map.getCenter();
+  ymap = new ymaps.Map('ymap', {center:[c.lat, c.lng], zoom:map.getZoom(), controls:[]},
+    {suppressMapOpenBlock:true, avoidFractionalZoom:false, yandexMapDisablePoiInteractivity:true});
+  ymap.behaviors.disable(['drag','scrollZoom','dblClickZoom','multiTouch','rightMouseButtonMagnifier','leftMouseButtonMagnifier']);
+  ymVer = 2; $('#stage').classList.add('ym21');
+  yandexReady('JS API 2.1 (запасной режим): значки организаций приглушены, но не скрыты');
+  map.on('zoomanim', e => ymap.setCenter([e.center.lat, e.center.lng], e.zoom, {duration:250}));
+}
+function yandexReady(note){
+  ymOK = true;
+  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=false; b.title=note; });
+  map.on('move zoom resize', syncYandex);
+  let pref = 'min'; try{ pref = localStorage.getItem('st-basemap') || 'min'; }catch(e){}
+  setBasemap(['schema','min','full'].includes(pref) ? pref : 'min');
 }
 function ymFail(e){
   const msg = (e && (e.message || e.toString && e.toString())) || String(e);
@@ -1634,25 +1666,26 @@ function initYandex(){
   }catch(e){
     console.warn('JS API 3.0: стиль или тема не приняты, запускаю без них', e);
     try{ $('#ymap').innerHTML=''; ymLayer = new YMapDefaultSchemeLayer({}); ymap = new YMap($('#ymap'), {location:loc, behaviors:[]}, [ymLayer]); }
-    catch(e2){ ymFail(e2); return; }
+    catch(e2){ $('#ymap').innerHTML=''; ymap=null; throw e2; }
   }
-  ymOK = true;
-  ['#bmMin','#bmFull'].forEach(id=>{ const b=$(id); b.disabled=false; b.title=''; });
-  map.on('move zoom', syncYandex);
+  ymVer = 3;
+  yandexReady('Яндекс Карты · JS API 3.0');
   map.on('zoomanim', e => ymap.update({location:{center:[e.center.lng, e.center.lat], zoom:e.zoom, duration:250}}));
-  map.on('resize', syncYandex);
-  let pref = 'min'; try{ pref = localStorage.getItem('st-basemap') || 'min'; }catch(e){}
-  setBasemap(['schema','min','full'].includes(pref) ? pref : 'min');
 }
-function syncYandex(){ if(!ymap) return; const c = map.getCenter(); ymap.update({location:{center:[c.lng, c.lat], zoom:map.getZoom(), duration:0}}); }
-function themeYandex(){ if(!ymap) return; try{ ymap.update({theme: ymTheme()}); ymLayer.update({theme: ymTheme()}); }catch(e){} }
+function syncYandex(){
+  if(!ymap) return; const c = map.getCenter();
+  if(ymVer===2){ ymap.container.fitToViewport(); ymap.setCenter([c.lat, c.lng], map.getZoom(), {duration:0}); }
+  else ymap.update({location:{center:[c.lng, c.lat], zoom:map.getZoom(), duration:0}});
+}
+function themeYandex(){ if(!ymap || ymVer!==3) return; try{ ymap.update({theme: ymTheme()}); ymLayer.update({theme: ymTheme()}); }catch(e){} }
 function setBasemap(mode){
   baseMode = (mode!=='schema' && ymOK) ? mode : 'schema';
   const y = baseMode!=='schema';
   $('#bmSchema').setAttribute('aria-pressed', !y); $('#bmMin').setAttribute('aria-pressed', baseMode==='min'); $('#bmFull').setAttribute('aria-pressed', baseMode==='full');
   $('#stage').classList.toggle('on-yandex', y);
   if(y){
-    try{ ymLayer.update({customization: baseMode==='min' ? YM_MINIMAL : []}); }catch(e){}
+    if(ymVer===3){ try{ ymLayer.update({customization: baseMode==='min' ? YM_MINIMAL : []}); }catch(e){} }
+    $('#stage').classList.toggle('ym-min', baseMode==='min');
     map.removeLayer(L_.base); map.removeLayer(L_.labels); syncYandex();
   } else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); }
   try{ localStorage.setItem('st-basemap', baseMode); }catch(e){}
