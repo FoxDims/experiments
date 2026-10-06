@@ -1393,6 +1393,8 @@ body{background:var(--canvas)}
 .kv .wide{grid-column:1/-1}
 .dd-ava{align-items:center}
 .dd-ava .ava{display:grid;width:26px;height:26px;font-size:10px}
+
+.stage.on-yandex .legend{bottom:60px;left:12px}
 </style>
 </head>
 <body>
@@ -1893,6 +1895,20 @@ function initYandex(){
   yandexReady('Яндекс Карты · JS API 3.0');
   map.on('zoomanim', e => ymap.update({location:{center:[e.center.lng, e.center.lat], zoom:e.zoom, duration:250}}));
 }
+/* Легенда стоит над кнопкой «Открыть Яндекс Карты» и выровнена с ней по левому краю */
+function placeLegend(){
+  const lg = $('#legend'), stage = $('#stage');
+  if(baseMode==='schema'){ lg.style.left=''; lg.style.bottom=''; return; }
+  const cand = [...$('#ymap').querySelectorAll('a,button,[role="button"]')].filter(el=>/Яндекс\s*Карт/i.test(el.textContent||'') && el.getBoundingClientRect().width>0 && el.getBoundingClientRect().width<320);
+  if(!cand.length) return false;
+  const r = cand.sort((a,b)=>a.getBoundingClientRect().left-b.getBoundingClientRect().left)[0].getBoundingClientRect(), sr = stage.getBoundingClientRect();
+  if(r.top < sr.top + sr.height/2) return false;
+  lg.style.left = Math.round(r.left - sr.left) + 'px';
+  lg.style.bottom = Math.round(sr.bottom - r.top + 8) + 'px';
+  return true;
+}
+function watchLegend(){ let n=0; const t=setInterval(()=>{ if(placeLegend() || ++n>40) clearInterval(t); }, 250); }
+window.addEventListener('resize', ()=>setTimeout(placeLegend, 200));
 function syncYandex(){
   if(!ymap) return; const c = map.getCenter();
   if(ymVer===2){ ymap.container.fitToViewport(); ymap.setCenter([c.lat, c.lng], map.getZoom(), {duration:0}); }
@@ -1907,8 +1923,8 @@ function setBasemap(mode){
   if(y){
     if(ymVer===3){ try{ ymLayer.update({customization: baseMode==='min' ? YM_MINIMAL : []}); }catch(e){} }
     $('#stage').classList.toggle('ym-min', baseMode==='min');
-    map.removeLayer(L_.base); map.removeLayer(L_.labels); syncYandex();
-  } else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); }
+    map.removeLayer(L_.base); map.removeLayer(L_.labels); syncYandex(); watchLegend();
+  } else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); placeLegend(); }
   styleRoutes();
   try{ localStorage.setItem('st-basemap', baseMode); }catch(e){}
 }
