@@ -1602,6 +1602,9 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .broken-top .chev-btn,.cand .chev-btn,.cand .chev-slot,.cand.is-sel .chev-btn{margin-right:0}
 /* lite: подсказка об отмене — строкой над кнопками */
 .dz-foot .dz-note{flex:1 1 100%;text-align:center}
+/* lite: смысловые блоки окна замены разделены крупнее */
+.dz-body{gap:32px;padding-top:20px}
+.dz-sec h3{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -2613,7 +2616,6 @@ function renderDecision(){
   </div>
   <div class="dz-body">
     <section class="dz-sec">
-      <h3>Сломанный автобус</h3>
       <div class="broken" id="broken">
         <div class="broken-top"><span class="broken-id">${b.id}</span><span class="sub">${b.plate} · ${b.model} · ${b.cap} мест</span><span class="chip crit">Сход с линии</span><button class="chev-btn" data-act="more" aria-expanded="false" aria-label="Подробнее" title="Подробнее">${ic('chevd')}</button></div>
         <dl class="kv">
