@@ -81,14 +81,14 @@ button{cursor:pointer;background:none;border:0;padding:0}
 
 /* ---------- shell ---------- */
 .app{--drawer-w:600px;--side-w:392px;display:grid;grid-template-columns:68px minmax(0,1fr) var(--side-w);grid-template-rows:60px minmax(0,1fr);height:100%;position:relative}
-.rail{grid-row:1/3;grid-column:1;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0 14px;z-index:5}
+.rail{grid-row:1/3;grid-column:1;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0 14px;z-index:1100}
 .logo{width:40px;height:40px;margin-bottom:14px}
 .rail-btn{position:relative;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--text-3);transition:background .15s,color .15s}
 .rail-btn:hover{background:var(--surface-2);color:var(--text)}
 .rail-btn.is-active{background:var(--brand-soft);color:var(--brand)}
 .rail-btn .ic{width:20px;height:20px}
 .rail-btn .dot{position:absolute;top:7px;right:7px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--crit-dot);color:#fff;font:700 10px/16px var(--f-num);text-align:center;box-shadow:0 0 0 2px var(--surface)}
-.rail-btn .tip{position:absolute;left:54px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--surface);font-size:12px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+.rail-btn .tip{z-index:2;box-shadow:var(--shadow-s);position:absolute;left:54px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--surface);font-size:12px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
 .rail-btn:hover .tip{opacity:1}
 .rail-spacer{flex:1}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--surface-3);color:var(--text-2);display:grid;place-items:center;font-weight:600;font-size:13px;margin-top:6px}
