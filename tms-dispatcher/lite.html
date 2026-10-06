@@ -746,6 +746,16 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start}
 .is-brief .broken:not(.is-open) .kv dd{display:flex;align-items:center;min-height:28px;flex-wrap:wrap}
 .broken.is-open .loc-btn{vertical-align:middle}
+
+/* ---- lite: «Влияние на маршрут» свёрнуто до строки итогов, схема и интервалы по клику ---- */
+.imp-h{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
+.dz-sec .imp-h span{display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-weight:600}
+.imp-h .ic{width:14px;height:14px;transition:transform .2s}
+.imp-h:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:6px}
+.imp.is-open .imp-h .ic{transform:rotate(180deg)}
+.imp:not(.is-open) .strip>svg,.imp:not(.is-open) .strip .iv{display:none}
+.imp:not(.is-open) .strip{padding:12px 16px;cursor:pointer}
+.imp:not(.is-open) .impact{margin-top:0}
 </style>
 <style>
 /* Layout: icon rail · top status bar · live map stage · event/route side panel; decisions open as a drawer over the map edge */
@@ -2504,17 +2514,17 @@ function renderDecision(){
       </div>
     </section>
     <section class="dz-sec">
-      <h3>Влияние на маршрут <span>план — интервал ${inc.plan} мин</span></h3>
-      <div class="strip">${stripSVG()}${intervalsHTML()}
-        <div class="impact"><span>${ic('clock')}</span><span>Интервал: <b>${inc.plan} → ${inc.gapMin} мин</b></span><span>Остановок под угрозой: <b>${ahead.length}</b></span><span>Ждут сейчас: <b>≈ ${waiting}</b> чел.</span></div>
-      </div>
-    </section>
-    <section class="dz-sec">
       <h3>Сопутствующие действия</h3>
       <div class="opts">
         <label class="opt"><input type="checkbox" id="optTow" checked>${ic('tow')}Вызвать техпомощь к борту 1047<small>~25 мин</small></label>
         <label class="opt"><input type="checkbox" id="optPax" checked>${ic('users')}Подобрать пассажиров сломанного борта</label>
         <label class="opt"><input type="checkbox" id="optInform" checked>${ic('speaker')}Оповестить пассажиров: табло и приложение</label>
+      </div>
+    </section>
+    <section class="dz-sec imp" id="impSec">
+      <h3><button class="imp-h" data-act="imp" aria-expanded="false" aria-controls="impStrip">Влияние на маршрут<span>план — интервал ${inc.plan} мин ${ic('chevd')}</span></button></h3>
+      <div class="strip" id="impStrip">${stripSVG()}${intervalsHTML()}
+        <div class="impact"><span>${ic('clock')}</span><span>Интервал: <b>${inc.plan} → ${inc.gapMin} мин</b></span><span>Остановок под угрозой: <b>${ahead.length}</b></span><span>Ждут сейчас: <b>≈ ${waiting}</b> чел.</span></div>
       </div>
     </section>
   </div>
@@ -2562,12 +2572,14 @@ $('#drawer').addEventListener('click', e=>{
     if(act==='close') closeDrawer();
     if(act==='assign') assign();
     if(act==='show') focusIncident();
+    if(act==='imp'){ const o = $('#impSec').classList.toggle('is-open'); a.setAttribute('aria-expanded', o); }
     if(act==='more'){ const o = $('#broken').classList.toggle('is-open'); a.setAttribute('aria-expanded', o); }
     if(act==='call') toast(`${ic('radio')} Вызов водителя борта 1047 · канал 4`);
     if(act==='undo') undoAssign();
     if(act==='done') closeDrawer();
     return; }
   const c = e.target.closest('[data-cand]'); if(c){ e.preventDefault(); selectCand(c.dataset.cand); }
+  if(e.target.closest('#impSec:not(.is-open) .strip')){ $('#impSec').classList.add('is-open'); $('.imp-h').setAttribute('aria-expanded', true); }
 });
 
 /* ---------- assign ---------- */
