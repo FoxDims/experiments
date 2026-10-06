@@ -2012,7 +2012,7 @@ function candHTML(c, i){
     ${i===0&&!off?'<span class="reco">Рекомендуем</span>':''}
     <input type="radio" name="cand" value="${c.id}" ${sel?'checked':''} ${off?'disabled':''}>
     <span class="c-radio"></span>
-    <div class="c-main"><div class="c-line1"><span class="c-id">${c.id}</span><span class="c-model">${c.model} · ${c.plate}</span>${kindChip}${flag}</div><div class="c-place">${c.place}</div><div class="c-driver">${ava(c.driver,'sm')}${c.driver}<span class="dim"> · смена до ${c.shiftEnd}</span></div></div>
+    <div class="c-main"><div class="c-line1"><span class="c-id">${c.id}</span><span class="c-model">${c.model} · ${c.plate}</span>${kindChip}${flag}</div><div class="c-place">${c.place}</div><div class="c-driver">${ava(c.driver,'sm')}${c.driver}<span class="dim" title="Смена водителя до ${c.shiftEnd}"> · до ${c.shiftEnd}</span></div></div>
     <div class="c-eta"><b>${off?'—':c.eta+'<span class="dim"> мин</span>'}</b><span>${(c.dist/1000).toFixed(1).replace('.',',')} км</span></div>
     ${off?'<span class="chev-slot"></span>':`<button type="button" class="chev-btn c-more" data-act="cmore" aria-expanded="false" aria-label="Подробнее" title="Подробнее">${ic('chevd')}</button>`}
     ${warn}<div class="c-tags">${tags.join('')}</div>
