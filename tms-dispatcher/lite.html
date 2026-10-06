@@ -669,96 +669,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		}
 	}
 
-/* ================= Детализация: Кратко / Подробно ================= */
-.dens{display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-s)}
-.dens button{height:34px;padding:0 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--text-3);transition:background .15s,color .15s}
-.dens button:hover{color:var(--text)}
-.dens button[aria-pressed="true"]{background:var(--brand-grad);color:#fff;box-shadow:0 6px 14px -6px var(--brand-glow)}
-.more-btn{display:none;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--brand);padding:4px 2px}
-.more-btn .ic{width:14px;height:14px;transition:transform .2s}
-.c-flag{display:none;color:var(--late)}
-.c-flag .ic{width:15px;height:15px;vertical-align:-2px}
-.bp-sum{display:none}
-
-/* резервы: свёрнутая строка, выбранный раскрыт */
-.is-brief .cand:not(.is-sel){padding:11px 16px;align-items:center}
-.is-brief .cand:not(.is-sel) :is(.c-model,.c-place,.c-driver,.c-warn,.c-tags,.c-eta>span){display:none}
-.is-brief .cand:not(.is-sel) .c-eta b .dim{font-size:12px}
-.is-brief .cand:not(.is-sel) .c-flag{display:inline}
-.is-brief .cand:not(.is-sel) .c-radio{margin-top:0;grid-row:1}
-.is-brief .cand:not(.is-sel) .c-line1{align-items:center}
-.is-brief .cand:not(.is-sel) .c-eta b{font-size:19px}
-.is-brief .cand .c-tags .norm{display:none}
-.is-brief .cand .c-tags:not(:has(.chip:not(.norm))){display:none}
-.is-brief .cand .c-key{opacity:0;transition:opacity .15s}
-.is-brief .cand:hover .c-key{opacity:1}
-.is-brief .cands{gap:6px}
-.is-brief .cand.is-sel{margin-top:4px}
-
-/* сломанный борт: где, когда, сколько людей */
-.is-brief .broken .more-btn{display:inline-flex;margin-left:4px}
-.is-brief .broken-top .chip{margin-left:auto}
-.is-brief .broken:not(.is-open) :is(.broken-top .sub,.kv .more,.kv dd small){display:none}
-.is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:32px;align-items:end}
-.is-brief .broken:not(.is-open) .kv .wide{grid-column:auto}
-.is-brief .broken:not(.is-open) .broken-top{margin-bottom:14px}
-.is-brief .broken.is-open .more-btn .ic{transform:rotate(180deg)}
-
-/* окно автобуса на карте */
-.is-brief .bp:not(.is-open) :is(dl,.bp-h>span:not(.rb):not(.chip)){display:none}
-.is-brief .bp:not(.is-open) .bp-h{margin-bottom:6px}
-.is-brief .bp:not(.is-open) .bp-sum{display:block;font-size:13px;color:var(--text-2)}
-.is-brief .bp .more-btn{display:inline-flex;margin-top:6px}
-.is-brief .bp.is-open .more-btn{order:9;margin:10px 0 0}
-.is-brief .bp.is-open .more-btn .ic{transform:rotate(180deg)}
-.is-brief .bp.is-open{display:flex;flex-direction:column}
-.bp-h .chip{margin-left:auto;margin-right:16px}
-.is-brief .bp dl :is(dt,dd):nth-of-type(2){display:none}
-body:not(.is-brief) .bp-h .chip{display:none}
-
-/* лента: одна строка, подробности по клику */
-.is-brief #feed .ev{cursor:pointer;padding-top:9px;padding-bottom:9px}
-.is-brief #feed .ev:hover{background:var(--surface-2)}
-.is-brief #feed .ev:not(.is-open) .ev-s{display:none}
-.is-brief #feed .ev:not(.is-open) .ev-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* маршруты: в норме только номер и название */
-.is-brief .rcard.is-ok:not(.is-sel){padding:10px 14px;margin-bottom:6px}
-.is-brief .rcard.is-ok:not(.is-sel) :is(.rm,.rbar,.chip){display:none}
-.is-brief .rcard.is-ok:not(.is-sel)::after{content:"";grid-column:3;grid-row:1;width:8px;height:8px;border-radius:50%;background:var(--ok);justify-self:end;margin-right:4px}
-@media (max-width:1180px){ .dens button{padding:0 10px} }
-
-/* ---- lite: панель демо скрыта, легенда — выпадашка, карточка сломанного в одну строку ---- */
-.scen{display:none!important}
-.lg-wrap{position:relative}
-.lg-btn .lg-dots{display:inline-flex;gap:3px}
-.lg-btn .lg-dots .sdot{width:7px;height:7px;margin:0}
-.lg-btn>.ic:last-child{width:14px;height:14px;transition:transform .2s;opacity:.7}
-.lg-btn[aria-expanded="true"]{color:var(--text)}
-.lg-btn[aria-expanded="true"]>.ic:last-child{transform:rotate(180deg)}
-.lg-wrap .legend,.stage.on-yandex .lg-wrap .legend{position:absolute;top:calc(100% + 8px);left:0;bottom:auto;min-width:220px}
-.lg-wrap .legend .lg-h{display:none}
-.loc-btn{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;border-radius:999px;color:var(--brand);background:var(--brand-soft);flex:none;transition:background .15s}
-.loc-btn:hover{background:var(--brand);color:#fff}
-.loc-btn .ic{width:15px;height:15px}
-.is-brief .broken:not(.is-open){padding:16px 20px 18px}
-.is-brief .broken:not(.is-open) .broken-top{margin-bottom:12px}
-.is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start}
-.is-brief .broken:not(.is-open) .kv dd{display:flex;align-items:center;min-height:28px;flex-wrap:wrap}
-.broken.is-open .loc-btn{vertical-align:middle}
-
-/* ---- lite: «Влияние на маршрут» свёрнуто до строки итогов, схема и интервалы по клику ---- */
-.imp-h{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
-.dz-sec .imp-h span{display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-weight:600}
-.imp-h .ic{width:14px;height:14px;transition:transform .2s}
-.imp-h:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:6px}
-.imp.is-open .imp-h .ic{transform:rotate(180deg)}
-.imp:not(.is-open) .strip>svg,.imp:not(.is-open) .strip .iv{display:none}
-.imp:not(.is-open) .strip{padding:12px 16px;cursor:pointer}
-.imp:not(.is-open) .impact{margin-top:0}
-
-/* ---- lite: бежевый фон подложки Яндекса (JS API 3.0) сдвигаем к фирменному лавандовому; белые дороги остаются нейтральными ---- */
-.stage.on-yandex.ym-min:not(.ym21) #ymap>*{filter:var(--ym3-tint)}
 </style>
 <style>
 /* Layout: icon rail · top status bar · live map stage · event/route side panel; decisions open as a drawer over the map edge */
@@ -1494,6 +1404,149 @@ body{background:var(--canvas)}
 :root[data-theme="dark"] .iv-row i.gap span{color:#FF6B74}
 :root[data-theme="dark"] .iv-row i.new span{color:#B7A8FF}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .iv-row i.gap span{color:#FF6B74} :root:not([data-theme="light"]) .iv-row i.new span{color:#B7A8FF} }
+/* ================= Детализация: Кратко / Подробно ================= */
+.dens{display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-s)}
+.dens button{height:34px;padding:0 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--text-3);transition:background .15s,color .15s}
+.dens button:hover{color:var(--text)}
+.dens button[aria-pressed="true"]{background:var(--brand-grad);color:#fff;box-shadow:0 6px 14px -6px var(--brand-glow)}
+.more-btn{display:none;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--brand);padding:4px 2px}
+.more-btn .ic{width:14px;height:14px;transition:transform .2s}
+.c-flag{display:none;color:var(--late)}
+.c-flag .ic{width:15px;height:15px;vertical-align:-2px}
+.bp-sum{display:none}
+
+/* резервы: свёрнутая строка, выбранный раскрыт */
+.is-brief .cand:not(.is-sel){padding:11px 16px;align-items:center}
+.is-brief .cand:not(.is-sel) :is(.c-model,.c-place,.c-driver,.c-warn,.c-tags,.c-eta>span){display:none}
+.is-brief .cand:not(.is-sel) .c-eta b .dim{font-size:12px}
+.is-brief .cand:not(.is-sel) .c-flag{display:inline}
+.is-brief .cand:not(.is-sel) .c-radio{margin-top:0;grid-row:1}
+.is-brief .cand:not(.is-sel) .c-line1{align-items:center}
+.is-brief .cand:not(.is-sel) .c-eta b{font-size:19px}
+.is-brief .cand .c-tags .norm{display:none}
+.is-brief .cand .c-tags:not(:has(.chip:not(.norm))){display:none}
+.is-brief .cand .c-key{opacity:0;transition:opacity .15s}
+.is-brief .cand:hover .c-key{opacity:1}
+.is-brief .cands{gap:6px}
+.is-brief .cand.is-sel{margin-top:4px}
+
+/* сломанный борт: где, когда, сколько людей */
+.is-brief .broken .more-btn{display:inline-flex;margin-left:4px}
+.is-brief .broken-top .chip{margin-left:auto}
+.is-brief .broken:not(.is-open) :is(.broken-top .sub,.kv .more,.kv dd small){display:none}
+.is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1fr) max-content max-content;column-gap:32px;align-items:end}
+.is-brief .broken:not(.is-open) .kv .wide{grid-column:auto}
+.is-brief .broken:not(.is-open) .broken-top{margin-bottom:14px}
+.is-brief .broken.is-open .more-btn .ic{transform:rotate(180deg)}
+
+/* окно автобуса на карте */
+.is-brief .bp:not(.is-open) :is(dl,.bp-h>span:not(.rb):not(.chip)){display:none}
+.is-brief .bp:not(.is-open) .bp-h{margin-bottom:6px}
+.is-brief .bp:not(.is-open) .bp-sum{display:block;font-size:13px;color:var(--text-2)}
+.is-brief .bp .more-btn{display:inline-flex;margin-top:6px}
+.is-brief .bp.is-open .more-btn{order:9;margin:10px 0 0}
+.is-brief .bp.is-open .more-btn .ic{transform:rotate(180deg)}
+.is-brief .bp.is-open{display:flex;flex-direction:column}
+.bp-h .chip{margin-left:auto;margin-right:16px}
+.is-brief .bp dl :is(dt,dd):nth-of-type(2){display:none}
+body:not(.is-brief) .bp-h .chip{display:none}
+
+/* лента: одна строка, подробности по клику */
+.is-brief #feed .ev{cursor:pointer;padding-top:9px;padding-bottom:9px}
+.is-brief #feed .ev:hover{background:var(--surface-2)}
+.is-brief #feed .ev:not(.is-open) .ev-s{display:none}
+.is-brief #feed .ev:not(.is-open) .ev-t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* маршруты: в норме только номер и название */
+.is-brief .rcard.is-ok:not(.is-sel){padding:10px 14px;margin-bottom:6px}
+.is-brief .rcard.is-ok:not(.is-sel) :is(.rm,.rbar,.chip){display:none}
+.is-brief .rcard.is-ok:not(.is-sel)::after{content:"";grid-column:3;grid-row:1;width:8px;height:8px;border-radius:50%;background:var(--ok);justify-self:end;margin-right:4px}
+@media (max-width:1180px){ .dens button{padding:0 10px} }
+
+/* ---- lite: панель демо скрыта, легенда — выпадашка, карточка сломанного в одну строку ---- */
+.scen{display:none!important}
+.lg-wrap{position:relative}
+.lg-btn .lg-dots{display:inline-flex;gap:3px}
+.lg-btn .lg-dots .sdot{width:7px;height:7px;margin:0}
+.lg-btn>.ic:last-child{width:14px;height:14px;transition:transform .2s;opacity:.7}
+.lg-btn[aria-expanded="true"]{color:var(--text)}
+.lg-btn[aria-expanded="true"]>.ic:last-child{transform:rotate(180deg)}
+.lg-wrap .legend,.stage.on-yandex .lg-wrap .legend{position:absolute;top:calc(100% + 8px);left:0;bottom:auto;min-width:220px}
+.lg-wrap .legend .lg-h{display:none}
+.loc-btn{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:6px;border-radius:999px;color:var(--brand);background:var(--brand-soft);flex:none;transition:background .15s}
+.loc-btn:hover{background:var(--brand);color:#fff}
+.loc-btn .ic{width:15px;height:15px}
+.is-brief .broken:not(.is-open){padding:16px 20px 18px}
+.is-brief .broken:not(.is-open) .broken-top{margin-bottom:12px}
+.is-brief .broken:not(.is-open) .kv{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);column-gap:20px;align-items:start}
+.is-brief .broken:not(.is-open) .kv dd{display:flex;align-items:center;min-height:28px;flex-wrap:wrap}
+.broken.is-open .loc-btn{vertical-align:middle}
+
+/* ---- lite: «Влияние на маршрут» свёрнуто до строки итогов, схема и интервалы по клику ---- */
+.imp-h{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit}
+.dz-sec .imp-h span{display:inline-flex;align-items:center;gap:6px;color:var(--brand);font-weight:600}
+.imp-h .ic{width:14px;height:14px;transition:transform .2s}
+.imp-h:focus-visible{outline:2px solid var(--brand);outline-offset:4px;border-radius:6px}
+.imp.is-open .imp-h .ic{transform:rotate(180deg)}
+.imp:not(.is-open) .strip>svg,.imp:not(.is-open) .strip .iv{display:none}
+.imp:not(.is-open) .strip{padding:12px 16px;cursor:pointer}
+.imp:not(.is-open) .impact{margin-top:0}
+
+/* ---- lite: бежевый фон подложки Яндекса (JS API 3.0) сдвигаем к фирменному лавандовому; белые дороги остаются нейтральными ---- */
+.stage.on-yandex.ym-min:not(.ym21) #ymap>*{filter:var(--ym3-tint)}
+
+/* ---- lite: топбар без подписи и часов, поиск по центру; показатели — полоса над событиями ---- */
+.tb-title p,.clock{display:none!important}
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:18px}
+.topbar .tb-right{grid-column:2;margin:0;justify-self:center}
+.topbar .search{width:420px}
+.avatar{position:relative;cursor:default;outline:0}
+.avatar .tip{z-index:20;box-shadow:var(--shadow-s);position:absolute;left:56px;top:50%;transform:translateY(-50%);background:var(--text);color:var(--surface);font-size:12px;font-weight:500;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s}
+.avatar:hover .tip,.avatar:focus-visible .tip{opacity:1}
+
+.side .kpis{display:flex;gap:0;margin:14px 14px 0;padding:10px 4px;background:var(--surface-2);border-radius:18px;flex:none}
+.side .kpi{flex:1 1 auto;min-width:0!important;padding:0 10px!important;background:none!important;box-shadow:none!important;border-radius:0;border-left:1px solid var(--line)!important;display:flex;flex-direction:column;gap:2px;animation:none}
+.side .kpi:first-child{border-left:0!important}
+.side .kpi-l{font-size:10.5px;letter-spacing:0;color:var(--text-3)!important;gap:5px}
+.side .kpi-l .sdot{width:6px;height:6px;margin:0}
+.side .kpi-v{font-size:17px;font-weight:700;color:var(--text)!important;line-height:1.15}
+.side .kpi-v small,.side .kpi-v .dim{font-size:11px!important;color:var(--text-3)!important}
+.side .kpi.k-reg{display:grid;grid-template-columns:auto auto;column-gap:6px;align-items:end}
+.side .kpi.k-reg .kpi-l{grid-column:1/3}
+.side .kpi.k-reg .kpi-v{color:var(--brand)!important}
+.side .kpi.k-reg .spark{width:36px;height:16px;margin-bottom:3px}
+.side .kpi .spark path:first-child{fill:var(--brand-soft)}
+.side .kpi .spark path:nth-child(2){stroke:var(--brand);stroke-width:2.4}
+.side .kpi .spark circle{fill:var(--brand);stroke:none}
+.side .kpi.is-crit .kpi-v{color:var(--crit)!important}
+.side .kpi.is-crit .sdot{animation:kpiDot 1.2s ease-in-out infinite}
+@keyframes kpiDot{50%{box-shadow:0 0 0 4px var(--crit-soft)}}
+.side .tabs{padding-top:12px}
+
+/* ---- lite: шапка окна замены без строки инцидента; компактный сломанный борт ---- */
+.dz-head{padding-top:16px;padding-bottom:14px;align-items:center}
+.dz-close{grid-row:1}
+.is-brief .broken:not(.is-open){padding:12px 16px 12px}
+.is-brief .broken:not(.is-open) .broken-top{margin-bottom:6px}
+.is-brief .broken:not(.is-open) .broken-id{font-size:22px}
+.is-brief .broken:not(.is-open) .kv{row-gap:0}
+.is-brief .broken:not(.is-open) .kv dt{font-size:11px;margin-bottom:0}
+.is-brief .broken:not(.is-open) .kv dd{min-height:26px;font-size:13.5px}
+.is-brief .broken:not(.is-open) .loc-btn{width:24px;height:24px}
+.broken{border-radius:18px}
+
+.side .kpis{margin:12px 12px 0;padding:10px 2px}
+.side .kpi{flex:1 1 auto;padding:0 7px!important}
+.side .kpi:first-child{padding-left:10px!important}
+.side .kpi:last-child{padding-right:10px!important}
+.side .kpi-l{font-size:10px;white-space:nowrap}
+.side .kpi-v{font-size:16px}
+.side .kpi-v small{letter-spacing:-.02em}
+.side .kpi.k-reg .spark{width:30px;height:14px}
+.is-brief .broken:not(.is-open){padding:10px 16px}
+.is-brief .broken:not(.is-open) .broken-top{margin-bottom:4px}
+.is-brief .broken:not(.is-open) .broken-top .chip{height:22px}
+.is-brief .broken:not(.is-open) .kv dd{min-height:24px}
 </style>
 </head>
 <body>
@@ -1519,15 +1572,13 @@ body{background:var(--canvas)}
     <button class="rail-btn" id="uxBtn"><span data-ic="book"></span><span class="tip">UX-логика прототипа</span></button>
     <button class="rail-btn" id="soundBtn" aria-pressed="true"><span data-ic="volume"></span><span class="tip">Звук аварий: вкл</span></button>
     <button class="rail-btn" id="themeBtn"><span data-ic="moon"></span><span class="tip">Сменить тему</span></button>
-    <div class="avatar" title="Морозова А. С., старший диспетчер">АМ</div>
+    <div class="avatar" tabindex="0" aria-describedby="shiftLine">АМ<span class="tip" id="shiftLine" role="tooltip">Рязань · смена · диспетчер Морозова А. С.</span></div>
   </nav>
 
   <header class="topbar">
     <div class="tb-title">
       <h1>Оперативная обстановка</h1>
-      <p id="shiftLine">Рязань · смена · диспетчер Морозова А. С.</p>
     </div>
-    <div class="kpis" id="kpis"></div>
     <div class="tb-right">
       <label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label>
       <div class="clock"><b id="clock">--:--:--</b><span id="dateLine"></span></div>
@@ -1573,6 +1624,7 @@ body{background:var(--canvas)}
   </main>
 
   <aside class="side" aria-label="События и маршруты">
+    <div class="kpis" id="kpis" aria-label="Показатели смены"></div>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-tab="feed">События <span class="cnt" id="feedCnt">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="routes">Маршруты <span class="cnt" id="routesCnt">0</span></button>
@@ -2229,7 +2281,7 @@ function renderKpis(){
   const inc = (state==='incident'||state==='deciding') ? 1 : 0;
   const k = [
     {l:'На линии', v:`${onLine}<small> / ${Object.keys(buses).length}</small>`},
-    {l:'Регулярность', v:(()=>{ const [a,b]=reg.toFixed(1).split('.'); return `${a}<span class="dim">,${b} %</span>`; })(), cls:'k-brand', extra:spark([...REG_HIST, reg])},
+    {l:'Регулярность', v:(()=>{ const [a,b]=reg.toFixed(1).split('.'); return `${a}<span class="dim">,${b} %</span>`; })(), cls:'k-reg', extra:spark([...REG_HIST, reg])},
     {l:`<span class="sdot warn"></span>Опаздывают`, v:`${c.warn + c.late}`},
     {l:`<span class="sdot ${inc?'crit':'ok'}"></span>Аварии`, v:`${inc}`, crit:inc},
     {l:'Резерв', v:`${reserves.length - (state==='assigned'?1:0)}`}
@@ -2501,7 +2553,6 @@ function renderDecision(){
   const arr = new Date(Date.now()+sel.eta*60000);
   $('#drawer').innerHTML = `
   <div class="dz-head">
-    <div class="dz-meta"><span class="chip crit">${ic('alert')}Критично</span><span>Инцидент <span class="num">№ ${inc.id}</span></span><span>·</span><span>сигнал <span class="num" data-since>${mmss(el)}</span> назад</span></div>
     <h2>Замена автобуса на маршруте 10</h2>
     <button class="dz-close" data-act="close" aria-label="Закрыть (Esc)">${ic('x')}</button>
   </div>
