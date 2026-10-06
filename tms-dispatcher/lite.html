@@ -756,6 +756,9 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .imp:not(.is-open) .strip>svg,.imp:not(.is-open) .strip .iv{display:none}
 .imp:not(.is-open) .strip{padding:12px 16px;cursor:pointer}
 .imp:not(.is-open) .impact{margin-top:0}
+
+/* ---- lite: бежевый фон подложки Яндекса (JS API 3.0) сдвигаем к фирменному лавандовому; белые дороги остаются нейтральными ---- */
+.stage.on-yandex.ym-min:not(.ym21) #ymap>*{filter:var(--ym3-tint)}
 </style>
 <style>
 /* Layout: icon rail · top status bar · live map stage · event/route side panel; decisions open as a drawer over the map edge */
@@ -1439,9 +1442,9 @@ body{background:var(--canvas)}
 }
 
 /* map tinted to the brand */
-:root{ --m-land:#EDEAF4; --m-urban:#E5E1EF; --m-road:#FFFFFF; --m-case:#D8D1E8; --m-minor:#F6F4FA; --m-route:#8E86A8; --m-route-y:#5B5378; --m-stop:#FFFFFF; --m-label:#9089A6; }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --m-land:#100D1A; --m-urban:#141121; --m-road:#221E34; --m-case:#08060E; --m-minor:#17142A; --m-route:#544C70; --m-route-y:#A49CC0; --m-stop:#151222; --m-label:#5E5778; } }
-:root[data-theme="dark"]{ --m-land:#100D1A; --m-urban:#141121; --m-road:#221E34; --m-case:#08060E; --m-minor:#17142A; --m-route:#544C70; --m-route-y:#A49CC0; --m-stop:#151222; --m-label:#5E5778; }
+:root{ --ym3-tint:hue-rotate(210deg) saturate(2.2) brightness(.95); --m-land:#EDEAF4; --m-urban:#E5E1EF; --m-road:#FFFFFF; --m-case:#D8D1E8; --m-minor:#F6F4FA; --m-route:#8E86A8; --m-route-y:#5B5378; --m-stop:#FFFFFF; --m-label:#9089A6; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --ym3-tint:none; --m-land:#100D1A; --m-urban:#141121; --m-road:#221E34; --m-case:#08060E; --m-minor:#17142A; --m-route:#544C70; --m-route-y:#A49CC0; --m-stop:#151222; --m-label:#5E5778; } }
+:root[data-theme="dark"]{ --ym3-tint:none; --m-land:#100D1A; --m-urban:#141121; --m-road:#221E34; --m-case:#08060E; --m-minor:#17142A; --m-route:#544C70; --m-route-y:#A49CC0; --m-stop:#151222; --m-label:#5E5778; }
 .app.drawer-open .overlay-tr{right:calc(var(--drawer-w) - var(--side-w) + 16px)}
 .overlay-tr{transition:right .3s cubic-bezier(.2,.8,.2,1)}
 
@@ -1928,9 +1931,10 @@ let ymap = null, ymLayer = null, ymOK = false, baseMode = 'schema', geoReal = !!
 let candRoutes = {}, candLocked = false;
 const withTimeout = (p, ms) => Promise.race([Promise.resolve(p), new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
 /* Упрощённая версия: только дороги и названия улиц — без зданий, заливок, воды, парков и подписей объектов */
-/* Цвета подложки в тон фирменному — как у собственной схемы (--m-land, --m-road) */
+/* Цвета подложки в тон фирменному — как у собственной схемы (--m-land, --m-road). Фон самого слоя Яндекса стилем не меняется, в светлой теме его сдвигает CSS-фильтр --ym3-tint */
 const YM_TINT = {
-  light:{land:'#EDEAF4', urban:'#E8E4F1', road:'#FFFFFF', roadCase:'#D8D1E8', label:'#7D7596'},
+  /* светлая тема: значения «до фильтра» --ym3-tint — после сдвига оттенка дают #EDEAF4 / #E8E4F1 / #D8D1E8 / #7D7596 */
+  light:{land:'#F9F8F4', urban:'#F4F2ED', road:'#FFFFFF', roadCase:'#E2DFD6', label:'#857F73'},
   dark: {land:'#100D1A', urban:'#141121', road:'#2A2540', roadCase:'#08060E', label:'#8A83A6'}
 };
 const ymMinimal = () => { const c = YM_TINT[ymTheme()]; return [
