@@ -2563,7 +2563,7 @@ function openDrawer(){ const d=$('#drawer'); d.classList.add('is-open'); $('#app
 function closeDrawer(){ const d=$('#drawer'); d.classList.remove('is-open'); $('#app').classList.remove('drawer-open'); d.setAttribute('aria-hidden','true'); if(state==='deciding'){ setState('incident'); drawFx(); } else renderAlert(); }
 
 function stripSVG(){
-  const r = routes['10']; const W=520, H=96, x0=10, x1=W-10, y=48; const X = d => x0 + (x1-x0)*d/r.path.len;
+  const r = routes['10']; const W=matchMedia('(max-width:1440px)').matches ? 300 : 340, H=112, x0=8, x1=W-8, y=54; /* lite: схема рисуется в реальную ширину окна (≈340 px), без масштабирования */ const X = d => x0 + (x1-x0)*d/r.path.len;
   const inc = incident;
   const ahead = r.stops.filter(s=>s.d>inc.d).slice(0,4).map(s=>s.key);
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Линейная схема маршрута 10">`;
@@ -2573,21 +2573,21 @@ function stripSVG(){
   s += `<line x1="${gx1}" y1="${y}" x2="${gx0}" y2="${y}" stroke="var(--crit-dot)" stroke-width="3" stroke-dasharray="3 4" opacity=".7"/>`;
   r.stops.forEach((st,i)=>{
     const hit = ahead.includes(st.key); const x = X(st.d);
-    s += `<circle cx="${x}" cy="${y}" r="${hit?4.5:3.5}" fill="var(--surface)" stroke="${hit?'var(--crit-dot)':'var(--text-3)'}" stroke-width="2"/>`;
+    s += `<circle cx="${x}" cy="${y}" r="${hit?5:4}" fill="var(--surface)" stroke="${hit?'var(--crit-dot)':'var(--text-3)'}" stroke-width="2"/>`;
     const isInc = st.key===inc.stop.key, last = i===r.stops.length-1;
-    if(i===0 || isInc || (last && Math.abs(x - X(inc.stop.d)) > 150)){
-      const anchor = i===0?'start': last?'end': x > W-120 ? 'end' : 'middle';
-      s += `<text x="${isInc && anchor==='end' ? x+6 : x}" y="${y+32}" text-anchor="${anchor}" font-size="11" font-weight="${isInc?600:400}" fill="${isInc?'var(--crit)':'var(--text-3)'}" font-family="var(--f-ui)">${isInc?'ост. «'+st.name+'»':st.name}</text>`;
+    if(i===0 || isInc || (last && Math.abs(x - X(inc.stop.d)) > 130)){
+      const anchor = i===0?'start': last?'end': x > W-90 ? 'end' : 'middle';
+      s += `<text x="${isInc && anchor==='end' ? x+6 : x}" y="${y+34}" text-anchor="${anchor}" font-size="12.5" font-weight="${isInc?600:400}" fill="${isInc?'var(--crit)':'var(--text-3)'}" font-family="var(--f-ui)">${isInc?'ост. «'+st.name+'»':st.name}</text>`;
     }
   });
   Object.values(buses).filter(b=>b.route==='10' && b.state!=='off').forEach(b=>{
-    const p = busPos(b); const x = X(p.d); const yy = p.fwd ? y-18 : y+14;
-    if(b.state==='broken'){ s += `<g transform="translate(${x},${y-18})"><rect x="-17" y="-9" width="34" height="18" rx="5" fill="var(--crit-dot)"/><text x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff" font-family="var(--f-num)">1047</text></g><line x1="${x}" y1="${y-9}" x2="${x}" y2="${y}" stroke="var(--crit-dot)" stroke-width="1.5"/>`; return; }
+    const p = busPos(b); const x = X(p.d); const yy = p.fwd ? y-19 : y+15;
+    if(b.state==='broken'){ s += `<g transform="translate(${x},${y-22})"><rect x="-21" y="-11" width="42" height="22" rx="6" fill="var(--crit-dot)"/><text x="0" y="4.5" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff" font-family="var(--f-num)">1047</text></g><line x1="${x}" y1="${y-11}" x2="${x}" y2="${y}" stroke="var(--crit-dot)" stroke-width="1.5"/>`; return; }
     const col = b.state==='moving' ? 'var(--brand)' : 'var(--text-2)';
-    s += `<rect x="${x-5}" y="${yy-4}" width="10" height="8" rx="2.5" fill="${col}" opacity="${p.fwd?1:.45}"/>`;
+    s += `<rect x="${x-6}" y="${yy-5}" width="12" height="10" rx="3" fill="${col}" opacity="${p.fwd?1:.45}"/>`;
   });
-  s += `<text x="${x0}" y="12" font-size="10.5" fill="var(--text-3)" font-family="var(--f-ui)">▸ в сторону «${dirTo()}»</text>`;
-  s += `<text x="${x0}" y="${H-2}" font-size="10.5" fill="var(--text-3)" font-family="var(--f-ui)">◂ обратное направление</text>`;
+  s += `<text x="${x0}" y="13" font-size="12" fill="var(--text-3)" font-family="var(--f-ui)">▸ в сторону «${dirTo()}»</text>`;
+  s += `<text x="${x0}" y="${H-2}" font-size="12" fill="var(--text-3)" font-family="var(--f-ui)">◂ обратное направление</text>`;
   return s + '</svg>';
 }
 function intervalsHTML(){
