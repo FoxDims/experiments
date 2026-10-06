@@ -7,6 +7,11 @@ root = pathlib.Path(__file__).parent
 src = (root / "src" / "index.src.html").read_text(encoding="utf-8")
 css = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
 full = src.replace("/*@@LEAFLET_CSS@@*/", css)
+# Реальные маршруты bus62.ru (tools/extract_bus62.py → data/routes.json); путь можно переопределить через ROUTES
+import os
+routes_path = pathlib.Path(os.environ.get("ROUTES", root / "data" / "routes.json"))
+if routes_path.exists():
+    full = full.replace("/*@@ROUTES@@*/null", routes_path.read_text(encoding="utf-8").strip())
 (root / "index.html").write_text(full, encoding="utf-8")
 if len(sys.argv) > 2:
     head = re.search(r"<head>(.*?)</head>", full, re.S).group(1)

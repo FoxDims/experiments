@@ -603,6 +603,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 
 <div class="ux" id="ux" hidden></div>
 
+<script>window.ROUTE_DATA = /*@@ROUTES@@*/null;</script>
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script>
@@ -700,6 +701,25 @@ const ROUTE_DEFS = [
   {id:'61', name:'Песочня — Кальное', parts:[['sev',1,4]], stops:['sevA','sevB','sevC','sevD'], buses:['6102','6104','6107']},
   {id:'9', name:'Соколовка — Приокский', parts:[['yug',0,3]], stops:['novosA','yugA','yugB','priok'], buses:['0903','0906','0909']}
 ];
+/* Реальные маршруты bus62.ru (если вшиты при сборке): маршрут 10 + 6 соседей с наибольшим общим участком */
+const REAL = (window.ROUTE_DATA && (window.ROUTE_DATA.routes||[]).some(r=>r.id==='10')) ? window.ROUTE_DATA : null;
+let REAL_DEFS = [];
+function pickRealRoutes(){
+  const all = REAL.routes.filter(r=>r.stops.length>=4);
+  const r10 = all.find(r=>r.id==='10');
+  const near = (pt, path) => { for(let i=0;i<path.length-1;i++){ const a=toXY(path[i]), b=toXY(path[i+1]), q=toXY(pt); const vx=b[0]-a[0], vy=b[1]-a[1], L2=vx*vx+vy*vy||1; const t=clamp(((q[0]-a[0])*vx+(q[1]-a[1])*vy)/L2,0,1); if(Math.hypot(q[0]-a[0]-vx*t, q[1]-a[1]-vy*t) < 90) return true; } return false; };
+  const score = r => r.path.filter(pt=>near(pt, r10.path)).length / r.path.length + 0.25*r10.path.filter(pt=>near(pt, r.path)).length / r10.path.length;
+  const others = all.filter(r=>r.id!=='10').map(r=>({r, sc:score(r)})).sort((a,b)=>b.sc-a.sc).slice(0,6).map(x=>x.r);
+  REAL_DEFS = [r10, ...others].map(r=>{
+    const isTen = r.id==='10';
+    const n = isTen ? 8 : clamp(Math.round(r.lengthM/3200), 3, 6);
+    const pre = r.id.padStart(2,'0');
+    return {id:r.id, real:r, name:`${r.stops[0].name} — ${r.stops[r.stops.length-1].name}`,
+      buses: isTen ? ['1041','1042','1043','1044','1045','1046','1047','1048'] : Array.from({length:n},(_,k)=>pre+String(2+k*3).padStart(2,'0'))};
+  });
+}
+if(REAL) pickRealRoutes();
+const DEFS = () => REAL ? REAL_DEFS : ROUTE_DEFS;
 function roadSlice(key,a,b){ const r=ROADS[key]; const out=[]; const step=a<=b?1:-1; for(let i=a; step>0?i<=b:i>=b; i+=step) out.push({ll:r.p[i], st:r.n}); return out; }
 function buildPath(parts){
   const pts=[]; parts.forEach(([k,a,b])=>{ const s=roadSlice(k,a,b); s.forEach((p,i)=>{ if(pts.length && i===0) return; pts.push(p); }); });
@@ -739,6 +759,18 @@ const INC_LL = [54.6196,39.7522];
 let incD = 0;
 
 function buildRoutes(){
+  if(REAL){
+    REAL_DEFS.forEach(def=>{
+      const pts = def.real.path.map(ll=>({ll, st:''}));
+      const cum=[0]; for(let i=1;i<pts.length;i++) cum.push(cum[i-1]+hav(pts[i-1].ll, pts[i].ll));
+      const path = {pts, cum, len:cum[cum.length-1], lls:pts.map(p=>p.ll)};
+      const stops = def.real.stops.map((st,i)=>({key:def.id+':'+i, name:st.name, ll:st.ll, d:project(path, st.ll)})).sort((a,b)=>a.d-b.d);
+      routes[def.id] = {...def, path, stops, cycleMin: 2*path.len/REAL_SPEED/60};
+    });
+    const st = routes['10'].stops; const s0 = st[Math.floor(st.length*0.6)], s1 = st[Math.floor(st.length*0.6)+1] || s0;
+    incD = s0.d + Math.min(120, (s1.d - s0.d)*0.35);
+    return;
+  }
   ROUTE_DEFS.forEach(def=>{
     const path = buildPath(def.parts);
     const stops = def.stops.map(k=>({key:k, name:STOPS[k][0], ll:STOPS[k][1], d:project(path, STOPS[k][1])})).sort((a,b)=>a.d-b.d);
@@ -746,16 +778,26 @@ function buildRoutes(){
   });
   incD = project(routes['10'].path, INC_LL);
 }
+/* Роли бортов для ленты событий: кто опаздывает, кто вернулся в график */
+const ROLE = {};
+function assignRoles(){
+  const ids = id => (DEFS().find(d=>d.id===id)||{}).buses || [];
+  const others = DEFS().filter(d=>d.id!=='10').map(d=>d.id);
+  const pick = (ri, bi) => { const r = others[ri % others.length]; const list = ids(r); return list[bi % list.length]; };
+  Object.assign(ROLE, REAL ? {late:pick(0,0), warn:pick(1,1), warn2:pick(2,0), back:pick(2,2)} : {late:'3501', warn:'2405', warn2:'1606', back:'1609'});
+  const set = (id, dev) => { if(buses[id]){ buses[id].dev = dev; buses[id].fixedDev = true; } };
+  set(ROLE.late, 432); set(ROLE.warn, 205); set(ROLE.warn2, 162); set(ROLE.back, 40); set('1043', -64);
+}
 function buildFleet(){
   let di = 0;
-  ROUTE_DEFS.forEach(def=>{
+  DEFS().forEach(def=>{
     const r = routes[def.id]; const n = def.buses.length; const L2 = 2*r.path.len;
     let base = R()*L2;
     if(def.id==='10'){ base = (incD - SPEED*10.5) - (6/n)*L2; }
     def.buses.forEach((id,k)=>{
       const m = MODELS[Math.floor(R()*MODELS.length)];
       const jitter = def.id==='10' ? 0 : (R()-.5)*0.06*L2/n;
-      buses[id] = { id, route:def.id, phase: ((base + k/n*L2 + jitter)%L2+L2)%L2, dev: DEV[id] ?? Math.round((R()-.5)*120),
+      buses[id] = { id, route:def.id, phase: ((base + k/n*L2 + jitter)%L2+L2)%L2, dev: REAL ? Math.round((R()-.5)*120) : (DEV[id] ?? Math.round((R()-.5)*120)), fixedDev: !REAL && DEV[id]!=null,
         plate:plateOf(id), model:m[0], cap:m[1], driver:DRIVERS[(di++)%DRIVERS.length], pax: 18+Math.floor(R()*40), moving:true, state:'line' };
     });
   });
@@ -766,6 +808,32 @@ function buildFleet(){
     {id:'2214', plate:'В 214 ОР 62', model:'ПАЗ-320414', cap:59, ll:[54.6083,39.7262], place:'Депо ПАТП № 2, ул. Станкозаводская', kind:'depot', prep:4, fuel:95, driver:'Лаптева О. Р.', shiftEnd:'02:00'},
     {id:'2302', plate:'Н 302 ЕК 62', model:'ЛиАЗ-5292', cap:108, ll:[54.5958,39.7604], place:'Конечная «Приокский»', kind:'break', prep:0, fuel:64, driver:'Белов С. А.', shiftEnd:'06:00', until:'22:10'}
   ];
+  assignRoles();
+  if(REAL) placeReservesReal();
+}
+/* Резерв на реальной сети: смещение от места аварии в метрах (x — восток, y — север), затем привязка к ближайшей трассе */
+function snapTo(target, routeIds){
+  let best=null;
+  routeIds.forEach(id=>{ const rt=routes[id]; const d=project(rt.path,target); const p=pointAt(rt.path,d).ll; const dist=hav(p,target); if(!best||dist<best.dist) best={ll:p, dist, route:id, d}; });
+  return best;
+}
+function nearestStopAny(ll, routeIds){
+  let best=null; routeIds.forEach(id=> routes[id].stops.forEach(st=>{ const d=hav(st.ll,ll); if(!best||d<best.d) best={st, d}; })); return best ? best.st : null;
+}
+function placeReservesReal(){
+  const inc = pointAt(routes['10'].path, incD).ll, ixy = toXY(inc);
+  const others = Object.keys(routes).filter(id=>id!=='10');
+  const at = (dx,dy) => toLL([ixy[0]+dx, ixy[1]+dy]);
+  const byId = id => reserves.find(r=>r.id===id);
+  const free = snapTo(at(-1300,-250), others);
+  Object.assign(byId('2210'), {ll:free.ll, place:`Резервная площадка у ост. «${nearestStopAny(free.ll, others).name}»`});
+  const busyRoute = DEFS().find(d=>d.id!=='10').id;
+  const busy = snapTo(at(1500,900), [busyRoute]);
+  Object.assign(byId('1088'), {ll:busy.ll, busyRoute, place:`М${busyRoute} · межрейсовый отстой у ост. «${nearestStopAny(busy.ll,[busyRoute]).name}»`, impact:`Интервал на М${busyRoute} вырастет с 12 до 17 мин`});
+  const depot = snapTo(at(-1900,-1500), others);
+  Object.assign(byId('2214'), {ll:depot.ll, place:'Депо ПАТП № 2'});
+  const st10 = routes['10'].stops; const term = st10[st10.length-1];
+  Object.assign(byId('2302'), {ll:term.ll, place:`Конечная «${term.name}»`});
 }
 function busPos(b){ const r=routes[b.route]; const L=r.path.len; const ph=b.phase; const fwd = ph < L; const d = fwd ? ph : 2*L-ph; const p=pointAt(r.path,d); return {...p, d, fwd}; }
 function nextStop(b){ const r=routes[b.route]; const p=busPos(b); const list = p.fwd ? r.stops.filter(s=>s.d>p.d+20) : r.stops.filter(s=>s.d<p.d-20).reverse(); const s = list[0] || (p.fwd ? r.stops[r.stops.length-1] : r.stops[0]); return {stop:s, dist:Math.abs(s.d-p.d), fwd:p.fwd}; }
@@ -838,6 +906,12 @@ const RAIL = [[54.6650,39.6000],[54.6520,39.6620],[54.6420,39.6990],[54.6332,39.
 const baseShapes = [];
 function drawBase(cv){
   const add = (layer, styleFn) => { layer.addTo(L_.base); baseShapes.push([layer, styleFn]); return layer; };
+  if(REAL){
+    REAL.routes.forEach(r=>{ add(L.polyline(r.path,{renderer:cv, pane:'base', interactive:false}), ()=>({color:cssVar('--m-case'), weight:9, lineCap:'round', lineJoin:'round'})); });
+    REAL.routes.forEach(r=>{ add(L.polyline(r.path,{renderer:cv, pane:'base', interactive:false}), ()=>({color:cssVar('--m-road'), weight:6, lineCap:'round', lineJoin:'round'})); });
+    restyleBase();
+    return;
+  }
   DISTRICTS.forEach(d=> add(L.polygon(ellipse(d.c,d.w*1.12,d.h*1.12,d.a),{renderer:cv, pane:'base', interactive:false}), ()=>({stroke:false, fillColor:cssVar('--m-urban'), fillOpacity:1})));
   add(L.polygon(smooth(MEADOW,3),{renderer:cv, pane:'base', interactive:false}), ()=>({stroke:false, fillColor:cssVar('--m-meadow'), fillOpacity:1}));
   PARKS.forEach(p=> add(L.polygon(ellipse(p.c,p.w,p.h,p.a),{renderer:cv, pane:'base', interactive:false}), ()=>({stroke:false, fillColor:cssVar('--m-park'), fillOpacity:1})));
@@ -858,7 +932,7 @@ function restyleBase(){ baseShapes.forEach(([l,f])=>l.setStyle(f())); }
 /* ================= Яндекс Карты (JS API 2.1) =================
    Leaflet остаётся слоем данных (маршруты, автобусы, эффекты) в проекции EPSG:3395 — той же, что у Яндекса.
    Под ним лежит синхронизированная карта Яндекса; трассы строятся геокодером и маршрутизатором. */
-let ymap = null, ymOK = false, baseMode = 'schema', geoReal = false, pendingGeo = null;
+let ymap = null, ymOK = false, baseMode = 'schema', geoReal = !!REAL, pendingGeo = null;
 let candRoutes = {}, candLocked = false;
 const RYAZAN_BOUNDS = [[54.55,39.52],[54.73,39.92]];
 const GEO_VER = 'st-geo-v1';
@@ -927,6 +1001,7 @@ function ymRoute(points){
   });
 }
 async function loadRealGeometry(){
+  if(REAL) return;
   let cache = {}; try{ cache = JSON.parse(localStorage.getItem(GEO_VER) || '{}'); }catch(e){}
   const out = {};
   for(const def of ROUTE_DEFS){
@@ -969,7 +1044,7 @@ function applyGeometry(){
 /* Резерв стоит на тех же смещениях от места аварии, что и на схеме, но прижат к ближайшей реальной улице маршрутной сети */
 const RES_OFFSETS = {};
 function relocateReserves(){
-  if(!geoReal) return;
+  if(!geoReal || REAL) return;
   const inc = pointAt(routes['10'].path, incD).ll, ixy = toXY(inc);
   reserves.forEach(r => {
     const off = RES_OFFSETS[r.id]; if(!off) return;
@@ -1135,14 +1210,16 @@ function renderLegend(){
 }
 
 /* ---------- feed ---------- */
+const bref = id => buses[id] ? `М${buses[id].route} · Борт ${id}` : `Борт ${id}`;
+const stopNear = id => buses[id] ? nextStop(buses[id]).stop.name : '—';
 function seedFeed(){
   feed = [
-    {t:minsAgo(3), lvl:'late', title:'М35 · Борт 3501 опаздывает на 7 мин', sub:'Затор на Первомайском пр. у пл. Победы'},
-    {t:minsAgo(6), lvl:'warn', title:'М24 · Борт 2405 опаздывает на 3 мин', sub:'Долгая посадка на ост. «Центральный рынок»'},
-    {t:minsAgo(11), lvl:'ok', title:'М16 · Борт 1609 вернулся в график', sub:'Отклонение +0:40'},
-    {t:minsAgo(17), lvl:'warn', title:'М16 · Борт 1606 опаздывает на 2 мин', sub:'Ремонт дороги, ул. Бирюзова'},
+    {t:minsAgo(3), lvl:'late', title:`${bref(ROLE.late)} опаздывает на 7 мин`, sub:`Затор у ост. «${stopNear(ROLE.late)}»`},
+    {t:minsAgo(6), lvl:'warn', title:`${bref(ROLE.warn)} опаздывает на 3 мин`, sub:`Долгая посадка на ост. «${stopNear(ROLE.warn)}»`},
+    {t:minsAgo(11), lvl:'ok', title:`${bref(ROLE.back)} вернулся в график`, sub:'Отклонение +0:40'},
+    {t:minsAgo(17), lvl:'warn', title:`${bref(ROLE.warn2)} опаздывает на 2 мин`, sub:`Ремонт дороги у ост. «${stopNear(ROLE.warn2)}»`},
     {t:minsAgo(26), lvl:'brand', title:'Резерв обновлён', sub:'4 автобуса в резерве · 2 свободны'},
-    {t:minsAgo(41), lvl:'ok', title:'Смена принята', sub:`${Object.keys(buses).length} ТС на линии · 7 маршрутов`}
+    {t:minsAgo(41), lvl:'ok', title:'Смена принята', sub:`${Object.keys(buses).length} ТС на линии · ${DEFS().length} маршрутов`}
   ];
 }
 function pushFeed(e){ e.t = e.t || new Date(); e.isNew = true; feed.unshift(e); renderFeed(); setTimeout(()=>{ e.isNew=false; }, 800); }
@@ -1151,7 +1228,7 @@ function renderFeed(){
   if(state==='incident' || state==='deciding'){
     const el = Math.round((Date.now()-incident.t0)/1000);
     top.innerHTML = `<li class="ev ev-crit"><span class="sdot crit"></span><div class="ev-t">М10 · Борт 1047: поломка, движение невозможно</div><span class="ev-time num" data-since>${mmss(el)}</span>
-      <div class="ev-s">${incident.street}, у ост. «${incident.stop.name}» · кнопка водителя + телеметрия: перегрев двигателя</div>
+      <div class="ev-s">${addr(incident)} · кнопка водителя + телеметрия: перегрев двигателя</div>
       <div class="ev-act"><button class="btn btn-ghost" data-act="show">${ic('target')}Показать</button><button class="btn btn-danger" data-act="solve">Решить <span class="kbd">Enter</span></button></div></li>`;
   } else if(state==='assigned'){
     const pr = assignAnim ? Math.round(assignAnim.progress*100) : 0;
@@ -1196,7 +1273,7 @@ function renderAlert(){
     a.hidden=false; a.className='alert';
     a.innerHTML = `<div class="alert-ic">${ic('alert')}</div><div class="alert-body"><div class="alert-top">Авария · Маршрут 10 <span class="num" data-since>${mmss((Date.now()-incident.t0)/1000)}</span></div>
       <div class="alert-title">Борт 1047 сломался на линии</div>
-      <div class="alert-sub">Интервал <span class="num">${incident.plan} → ${incident.gapMin}</span> мин · ${incident.street}, у ост. «${incident.stop.name}»</div></div>
+      <div class="alert-sub">Интервал <span class="num">${incident.plan} → ${incident.gapMin}</span> мин · ${addr(incident)}</div></div>
       <div class="alert-actions"><button class="btn btn-ghost" data-act="show">${ic('target')}Показать</button><button class="btn btn-danger" data-act="solve">Решить <span class="kbd">Enter</span></button></div>`;
   } else if(state==='assigned' && !$('#drawer').classList.contains('is-open')){
     a.hidden=false; a.className='alert is-progress';
@@ -1261,6 +1338,18 @@ function intervalsFor(withBroken){
   const ph = list.map(b=>({id:b.id, p:b.phase})).sort((a,b)=>a.p-b.p);
   return ph.map((x,i)=>{ const nx = ph[(i+1)%ph.length]; const gap = ((nx.p - x.p) + L2) % L2 || L2; return {from:x.id, to:nx.id, min: gap/L2*r.cycleMin}; });
 }
+const addr = inc => inc.street ? `${inc.street}, у ост. «${inc.stop.name}»` : `Ост. «${inc.stop.name}»`;
+const dirTo = () => { const st = routes['10'].stops; return st[st.length-1].name; };
+function reverseStreet(){
+  if(!ymOK || !incident) return;
+  const inc = incident;
+  withTimeout(ymaps.geocode(inc.ll, {kind:'street', results:1}), 8000).then(r=>{
+    const o = r.geoObjects.get(0); const name = o && (o.properties.get('name') || '');
+    if(!name || incident!==inc) return;
+    inc.street = name; renderAlert(); renderFeed();
+    if(state==='deciding') renderDecision(); else if(state==='assigned') renderDone();
+  }).catch(()=>{});
+}
 function triggerIncident(){
   if(state!=='idle') return;
   clearInterval(countdownTimer);
@@ -1273,7 +1362,8 @@ function triggerIncident(){
   const plan = before.reduce((a,x)=>a+x.min,0)/before.length;
   const gap = Math.max(...after.map(x=>x.min));
   incident = {id:2417, bus:b, ll:p.ll, d:p.d, street:p.st, stop, t0:Date.now(), plan:Math.round(plan), gapMin:Math.round(gap)};
-  pushFeed({lvl:'crit', title:'М10 · Борт 1047: поломка на линии', sub:`${p.st}, у ост. «${stop.name}»`});
+  const feedItem = {lvl:'crit', title:'М10 · Борт 1047: поломка на линии', get sub(){ return addr(incident||{stop, street:p.st}); }};
+  pushFeed(feedItem); reverseStreet();
   setState('incident');
   drawFx(); routeCandidates();
   beep(); clearInterval(beepTimer); beepTimer = setInterval(()=>{ if(state==='incident') beep(); }, 7000);
@@ -1349,7 +1439,7 @@ function stripSVG(){
     const col = b.state==='moving' ? 'var(--brand)' : 'var(--text-2)';
     s += `<rect x="${x-5}" y="${yy-4}" width="10" height="8" rx="2.5" fill="${col}" opacity="${p.fwd?1:.45}"/>`;
   });
-  s += `<text x="${x0}" y="12" font-size="10.5" fill="var(--text-3)" font-family="var(--f-ui)">▸ в сторону Приокского</text>`;
+  s += `<text x="${x0}" y="12" font-size="10.5" fill="var(--text-3)" font-family="var(--f-ui)">▸ в сторону «${dirTo()}»</text>`;
   s += `<text x="${x0}" y="${H-2}" font-size="10.5" fill="var(--text-3)" font-family="var(--f-ui)">◂ обратное направление</text>`;
   return s + '</svg>';
 }
@@ -1379,7 +1469,7 @@ function renderDecision(){
       <div class="broken">
         <div class="broken-top"><span class="broken-id">${b.id}</span><span class="sub">${b.plate}<br>${b.model} · ${b.cap} мест</span><span class="chip crit">Сход с линии</span></div>
         <dl class="kv">
-          <div class="wide"><dt>Где</dt><dd>${inc.street}, у ост. «${inc.stop.name}» <button class="btn btn-ghost" style="height:26px;padding:0 8px;font-size:12px;margin-left:6px;vertical-align:1px" data-act="show">${ic('target')}На карте</button><small>${inc.ll[0].toFixed(5)}, ${inc.ll[1].toFixed(5)} · направление на Приокский</small></dd></div>
+          <div class="wide"><dt>Где</dt><dd>${addr(inc)} <button class="btn btn-ghost" style="height:26px;padding:0 8px;font-size:12px;margin-left:6px;vertical-align:1px" data-act="show">${ic('target')}На карте</button><small>${inc.ll[0].toFixed(5)}, ${inc.ll[1].toFixed(5)} · в сторону «${dirTo()}»</small></dd></div>
           <div><dt>Когда</dt><dd class="num">${hhmmss(new Date(inc.t0))}</dd></div>
           <div><dt>Причина</dt><dd>Перегрев двигателя<small>t° ОЖ 118 °C · код P0217</small></dd></div>
           <div><dt>В салоне</dt><dd class="num">≈ ${b.pax}</dd></div>
@@ -1417,7 +1507,7 @@ function renderDecision(){
 function sumHTML(c, arr){ return `<b>Борт <span class="num">${c.id}</span> → М10</b> · прибытие <span class="num">${hhmm(arr)}</span> · через <span class="num">${c.eta}</span> мин · интервал снова <span class="num">${incident.plan}</span> мин`; }
 function candHTML(c, i){
   const sel = selCand && selCand.id===c.id; const off = c.kind==='break';
-  const kindChip = {free:'<span class="chip ok">Свободен</span>', busy:'<span class="chip warn">Занят на М24</span>', depot:'<span class="chip mute">В депо</span>', break:'<span class="chip mute">Перерыв</span>'}[c.kind];
+  const kindChip = {free:'<span class="chip ok">Свободен</span>', busy:`<span class="chip warn">Занят на М${c.busyRoute||'24'}</span>`, depot:'<span class="chip mute">В депо</span>', break:'<span class="chip mute">Перерыв</span>'}[c.kind];
   const tags = [];
   if(i===0 && !off) tags.push(`<span class="chip brand">${ic('check')}Ближе всех из свободных</span>`);
   if(c.cap >= incident.bus.cap) tags.push(`<span class="chip mute">Тот же класс · ${c.cap} мест</span>`); else tags.push(`<span class="chip late">Меньше мест: ${c.cap}</span>`);
@@ -1475,7 +1565,7 @@ function assign(){
     const cum=[0]; for(let i=1;i<path.length;i++) cum.push(cum[i-1]+hav(path[i-1],path[i]));
     assignAnim = {path, cum, len:cum[cum.length-1], dur:c.eta*60/DEMO_ACCEL, t0:performance.now(), progress:0, leftReal:c.eta*60};
     pushFeed({lvl:'brand', title:`Борт ${c.id} назначен на М10`, sub:`Прибытие к ${hhmm(new Date(Date.now()+c.eta*60000))} · решение за ${mmss(lastReaction)}`});
-    if(opts.tow) pushFeed({lvl:'brand', title:'Техпомощь вызвана к борту 1047', sub:`${incident.street} · ориентировочно 25 мин`});
+    if(opts.tow) pushFeed({lvl:'brand', title:'Техпомощь вызвана к борту 1047', sub:`${addr(incident)} · ориентировочно 25 мин`});
     setState('assigned'); drawFx(); renderDone();
     clearTimeout(undoTimer); let u=10; const tick=()=>{ const b=$('[data-act="undo"]'); if(b){ b.innerHTML = `${ic('reset')}Отменить · ${u} с`; } if(u--<=0){ b && b.remove(); return; } undoTimer=setTimeout(tick,1000); }; tick();
     setTimeout(()=>{ if(state==='assigned'){ incident.ack = new Date(); renderDone(); pushFeed({lvl:'ok', title:`Водитель борта ${c.id} подтвердил`, sub:'Следует к месту поломки'}); } }, 2600);
@@ -1562,7 +1652,7 @@ function uiTick(){
   $('#dateLine').textContent = now.toLocaleDateString('ru-RU',{weekday:'short', day:'numeric', month:'long'});
   if(incident && (state==='incident'||state==='deciding')) $$('[data-since]').forEach(el=> el.textContent = mmss((Date.now()-incident.t0)/1000));
   if(assignAnim){ $$('[data-eta]').forEach(el=> el.textContent = mmss(assignAnim.leftReal)); $$('[data-bar]').forEach(el=> el.style.width = Math.round(assignAnim.progress*100)+'%'); }
-  Object.values(buses).forEach(b=>{ if(b.state==='line' && !DEV[b.id]) b.dev = clamp(b.dev + (Math.random()-.5)*6, -110, 110); });
+  Object.values(buses).forEach(b=>{ if(b.state==='line' && !b.fixedDev) b.dev = clamp(b.dev + (Math.random()-.5)*6, -110, 110); });
 }
 function shiftLine(){ const h = new Date().getHours(); const s = h>=6&&h<14 ? 'утренняя смена' : h>=14&&h<22 ? 'вечерняя смена' : 'ночная смена'; $('#shiftLine').textContent = `Рязань · ${s} · диспетчер Морозова А. С.`; }
 
@@ -1668,7 +1758,7 @@ function renderUX(){
     <div class="grid3">
       <div class="card"><h5>1. Что случилось</h5><p>Карточка сломанного борта: номер, госномер, место с ближайшей остановкой и координатами, время, причина по телеметрии, пассажиры, связь с водителем.</p></div>
       <div class="card"><h5>2. Чем грозит</h5><p>Линейная схема маршрута и интервалы «сейчас / после замены». Видно, где образуется разрыв, сколько остановок и пассажиров затронуто.</p></div>
-      <div class="card"><h5>3. Кем заменить</h5><p>Резерв отсортирован по времени доезда с учётом доступности. Для каждого кандидата видны причины и риски: «занят на М24 — интервал там вырастет», «меньше мест», «перерыв до 22:10».</p></div>
+      <div class="card"><h5>3. Кем заменить</h5><p>Резерв отсортирован по времени доезда с учётом доступности. Для каждого кандидата видны причины и риски: «занят на другом маршруте — интервал там вырастет», «меньше мест», «перерыв до 22:10».</p></div>
     </div>
     <div class="card" style="margin-top:16px"><h5>Как система ранжирует резерв</h5><p>Оценка прозрачна, решение остаётся за диспетчером:</p>
       <div class="formula">оценка = время_доезда + подготовка
@@ -1700,7 +1790,7 @@ $('#ux').addEventListener('click', e=>{ if(e.target.closest('[data-ux-close]')) 
 buildRoutes();
 buildFleet();
 initMap();
-rememberReserveOffsets();
+if(!REAL) rememberReserveOffsets();
 drawReserves();
 createBusMarkers();
 seedFeed();
