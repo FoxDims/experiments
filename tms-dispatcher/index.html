@@ -689,7 +689,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   --m-land:#E8EAEE; --m-urban:#E1E4E9; --m-water:#C6D5E5; --m-park:#D8E4D3; --m-meadow:#E2EADB;
   --m-road:#FFFFFF; --m-case:#D0D4DC; --m-minor:#F3F4F7; --m-rail:#B4BAC6; --m-label:#8A91A1;
-  --m-route:#8F98AC; --m-stop:#FFFFFF;
+  --m-route:#8F98AC; --m-stop:#FFFFFF; --m-route-y:#4F586B;
   --ym21-filter:none; --ym21-filter-min:saturate(.2) contrast(.9) brightness(1.04); --ym21-veil:.42;
   color-scheme:light;
 }
@@ -708,7 +708,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     --overlay:rgba(10,12,17,.84);
     --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
     --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
-    --m-route:#4C5569; --m-stop:#12151C;
+    --m-route:#4C5569; --m-stop:#12151C; --m-route-y:#9AA3B8;
     --ym21-filter:invert(1) hue-rotate(180deg) saturate(.5) brightness(.85) contrast(.9); --ym21-filter-min:invert(1) hue-rotate(180deg) saturate(.15) brightness(.75) contrast(.85); --ym21-veil:.45;
     color-scheme:dark;
   }
@@ -727,7 +727,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --overlay:rgba(10,12,17,.84);
   --m-land:#0F1218; --m-urban:#13171E; --m-water:#152030; --m-park:#111A16; --m-meadow:#111815;
   --m-road:#242935; --m-case:#0B0D12; --m-minor:#181C24; --m-rail:#2A2F3B; --m-label:#566072;
-  --m-route:#4C5569; --m-stop:#12151C;
+  --m-route:#4C5569; --m-stop:#12151C; --m-route-y:#9AA3B8;
   --ym21-filter:invert(1) hue-rotate(180deg) saturate(.5) brightness(.85) contrast(.9); --ym21-filter-min:invert(1) hue-rotate(180deg) saturate(.15) brightness(.75) contrast(.85); --ym21-veil:.45;
   color-scheme:dark;
 }
@@ -868,6 +868,10 @@ button{cursor:pointer;background:none;border:0;padding:0}
 #ymap{position:absolute;inset:0;pointer-events:none}
 .stage.on-yandex #map,.stage.on-yandex .leaflet-container{background:transparent}
 .stage.on-yandex .legend,.stage.on-yandex .scen{bottom:40px}
+.stage.on-yandex .bm{box-shadow:0 0 0 2.5px var(--bg),0 2px 6px rgba(0,0,0,.45)}
+.stage.on-yandex .bm.s-ok,.stage.on-yandex .bm.s-warn,.stage.on-yandex .bm.s-reserve{background:var(--surface);border-width:2.5px}
+/* промо-блок Яндекса «Открыть в Яндекс Картах / Создать свою карту»; логотип, копирайт и условия остаются */
+#ymap [class*="copyrights-promo"],#ymap [class*="map-open-block"]{display:none!important}
 /* запасной JS API 2.1: стилизации нет, поэтому «Минимум» — обесцвечивание и вуаль цвета фона, тёмная тема — инверсия */
 #ymap::after{content:"";position:absolute;inset:0;background:var(--m-land);opacity:0;pointer-events:none;z-index:1;transition:opacity .2s}
 .stage.ym21.ym-min #ymap::after{opacity:var(--ym21-veil)}
@@ -1688,6 +1692,7 @@ function setBasemap(mode){
     $('#stage').classList.toggle('ym-min', baseMode==='min');
     map.removeLayer(L_.base); map.removeLayer(L_.labels); syncYandex();
   } else { if(!map.hasLayer(L_.base)) L_.base.addTo(map); if(!map.hasLayer(L_.labels)) L_.labels.addTo(map); }
+  styleRoutes();
   try{ localStorage.setItem('st-basemap', baseMode); }catch(e){}
 }
 /* Название улицы по координатам — HTTP-геокодер Яндекса (тот же ключ JS API) */
@@ -1760,10 +1765,10 @@ function drawRoutes(){
   styleRoutes();
 }
 function styleRoutes(){
-  const base=cssVar('--m-route'), brand=cssVar('--brand'), crit=cssVar('--crit-dot'), stopFill=cssVar('--m-stop');
+  const onY = baseMode!=='schema'; const base=cssVar(onY?'--m-route-y':'--m-route'), brand=cssVar('--brand'), crit=cssVar('--crit-dot'), stopFill=cssVar('--m-stop');
   const inc = ['incident','deciding'].includes(state) ;
   Object.entries(routeLines).forEach(([id,{glow,line}])=>{
-    let c=base, w=3, o=.85, gw=0, gc=base, go=0;
+    let c=base, w=onY?4:3, o=onY?.95:.85, gw=0, gc=base, go=0;
     if(selRoute){ if(id===selRoute){ c=brand; w=5; o=1; gw=12; gc=brand; go=.18; } else { o=.3; } }
     if(id==='10' && inc){ c=crit; w=5; o=1; gw=14; gc=crit; go=.18; }
     else if(inc && !selRoute){ o=.35; }
