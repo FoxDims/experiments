@@ -132,10 +132,11 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .chipbtn[aria-pressed="false"]{opacity:.6}
 .chipbtn:hover{color:var(--text)}
 .chipbtn.route-filter{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
-.overlay-tr{position:absolute;top:16px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.overlay-tr{position:absolute;top:16px;right:16px;z-index:500;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .mapctl{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-s);overflow:hidden}
-.mapctl button{width:36px;height:36px;display:grid;place-items:center;color:var(--text-2)}
+.mapctl button{width:32px;height:32px;display:grid;place-items:center;color:var(--text-2)}
 .mapctl button+button{border-top:1px solid var(--line)}
+.mapctl .ic{width:16px;height:16px}
 .mapctl button:hover{background:var(--surface-2);color:var(--text)}
 .basemap-sw{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow-s);padding:3px;gap:2px}
 .basemap-sw button{font-size:11.5px;font-weight:500;padding:5px 8px;border-radius:7px;color:var(--text-3)}
@@ -554,14 +555,14 @@ button{cursor:pointer;background:none;border:0;padding:0}
       <button class="chipbtn route-filter" id="routeFilter" hidden></button>
     </div>
     <div class="overlay-tr">
-      <div class="mapctl">
-        <button id="zIn" aria-label="Приблизить"><span data-ic="plus"></span></button>
-        <button id="zOut" aria-label="Отдалить"><span data-ic="minus"></span></button>
-        <button id="zFit" aria-label="Весь город"><span data-ic="target"></span></button>
-      </div>
       <div class="basemap-sw" role="group" aria-label="Подложка">
         <button id="bmSchema" aria-pressed="true">Схема</button>
         <button id="bmYandex" aria-pressed="false" disabled title="Яндекс Карты загружаются…">Яндекс</button>
+      </div>
+      <div class="mapctl">
+        <button id="zIn" aria-label="Приблизить" title="Приблизить"><span data-ic="plus"></span></button>
+        <button id="zOut" aria-label="Отдалить" title="Отдалить"><span data-ic="minus"></span></button>
+        <button id="zFit" aria-label="Весь город" title="Весь город"><span data-ic="target"></span></button>
       </div>
     </div>
     <div class="alert" id="alert" hidden role="alert"></div>
