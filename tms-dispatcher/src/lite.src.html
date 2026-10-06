@@ -912,6 +912,14 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .broken.is-open .kv .wide{grid-column:1/-1}
 /* lite: строка итога «Борт → М10 · прибытие…» не показывается — то же видно в выбранной карточке */
 #dzSum{display:none}
+
+/* lite: в выбранном резерве модель, госномер и водитель — под «Подробнее» */
+.is-brief .cand.is-sel:not(.c-open) :is(.c-model,.c-driver){display:none}
+.is-brief .cand.is-sel .c-more{display:inline-flex;margin-left:auto;padding:2px 0}
+.is-brief .cand.c-open .c-more .ic{transform:rotate(180deg)}
+.is-brief .cand.is-sel .c-line1{flex-wrap:nowrap}
+.is-brief .cand.is-sel.c-open .c-line1{flex-wrap:wrap}
+.is-brief .cand.is-sel.c-open .c-model{order:9}
 </style>
 </head>
 <body>
@@ -1981,7 +1989,7 @@ function candHTML(c, i){
     ${i===0&&!off?'<span class="reco">Рекомендуем</span>':''}
     <input type="radio" name="cand" value="${c.id}" ${sel?'checked':''} ${off?'disabled':''}>
     <span class="c-radio"></span>
-    <div class="c-main"><div class="c-line1"><span class="c-id">${c.id}</span><span class="c-model">${c.model} · ${c.plate}</span>${kindChip}${flag}</div><div class="c-place">${c.place}</div><div class="c-driver">${ava(c.driver,'sm')}${c.driver}<span class="dim"> · смена до ${c.shiftEnd}</span></div></div>
+    <div class="c-main"><div class="c-line1"><span class="c-id">${c.id}</span><span class="c-model">${c.model} · ${c.plate}</span>${kindChip}${flag}${off?'':`<button type="button" class="more-btn c-more" data-act="cmore" aria-expanded="false">Подробнее${ic('chevd')}</button>`}</div><div class="c-place">${c.place}</div><div class="c-driver">${ava(c.driver,'sm')}${c.driver}<span class="dim"> · смена до ${c.shiftEnd}</span></div></div>
     <div class="c-eta"><b>${off?'—':c.eta+'<span class="dim"> мин</span>'}</b><span>${(c.dist/1000).toFixed(1).replace('.',',')} км</span></div>
     ${warn}<div class="c-tags">${tags.join('')}</div>
     ${off?'':`<span class="kbd c-key">${i+1}</span>`}
@@ -2000,6 +2008,7 @@ $('#drawer').addEventListener('click', e=>{
     if(act==='close') closeDrawer();
     if(act==='assign') assign();
     if(act==='show') focusIncident();
+    if(act==='cmore'){ e.preventDefault(); const card = a.closest('.cand'); const o = card.classList.toggle('c-open'); a.setAttribute('aria-expanded', o); return; }
     if(act==='imp'){ const o = $('#impSec').classList.toggle('is-open'); a.setAttribute('aria-expanded', o); }
     if(act==='more'){ const o = $('#broken').classList.toggle('is-open'); a.setAttribute('aria-expanded', o); }
     if(act==='call') toast(`${ic('radio')} Вызов водителя борта 1047 · канал 4`);
