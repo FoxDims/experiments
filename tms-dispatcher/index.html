@@ -1395,6 +1395,14 @@ body{background:var(--canvas)}
 .dd-ava .ava{display:grid;width:26px;height:26px;font-size:10px}
 
 .stage.on-yandex .legend{bottom:60px;left:12px}
+
+.iv-row{height:28px}
+.iv-row i span{background:var(--surface);color:var(--text);font:700 12px/1 var(--f-num);padding:3px 7px;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.iv-row i.gap span{color:#C81E2B}
+.iv-row i.new span{color:#4B37A8}
+:root[data-theme="dark"] .iv-row i.gap span{color:#FF6B74}
+:root[data-theme="dark"] .iv-row i.new span{color:#B7A8FF}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .iv-row i.gap span{color:#FF6B74} :root:not([data-theme="light"]) .iv-row i.new span{color:#B7A8FF} }
 </style>
 </head>
 <body>
@@ -2372,7 +2380,7 @@ function stripSVG(){
 function intervalsHTML(){
   const now = intervalsFor(false), plan = intervalsFor(true);
   const total = now.reduce((a,x)=>a+x.min,0);
-  const row = (arr, mark) => `<div class="iv-row">${arr.map(x=>{ const cls = mark(x); return `<i class="${cls}" style="flex:${x.min/total}" title="${x.from} → ${x.to}">${Math.round(x.min)}</i>`; }).join('')}</div>`;
+  const row = (arr, mark) => `<div class="iv-row">${arr.map(x=>{ const cls = mark(x); return `<i class="${cls}" style="flex:${x.min/total}" title="${x.from} → ${x.to}"><span>${Math.round(x.min)}</span></i>`; }).join('')}</div>`;
   const maxNow = Math.max(...now.map(x=>x.min));
   return `<div class="iv"><span>Сейчас</span>${row(now, x=> x.min===maxNow ? 'gap':'')}<span>После замены</span>${row(plan, x=> (x.from==='1047'||x.to==='1047') ? 'new':'')}</div>`;
 }
