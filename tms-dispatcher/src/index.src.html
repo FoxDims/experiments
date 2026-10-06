@@ -712,10 +712,10 @@ function pickRealRoutes(){
   const others = all.filter(r=>r.id!=='10').map(r=>({r, sc:score(r)})).sort((a,b)=>b.sc-a.sc).slice(0,6).map(x=>x.r);
   REAL_DEFS = [r10, ...others].map(r=>{
     const isTen = r.id==='10';
-    const n = isTen ? 8 : clamp(Math.round(r.lengthM/3200), 3, 6);
+    const n = isTen ? 5 : clamp(Math.round(r.lengthM/3200), 3, 6);
     const pre = r.id.padStart(2,'0');
     return {id:r.id, real:r, name:`${r.stops[0].name} — ${r.stops[r.stops.length-1].name}`,
-      buses: isTen ? ['1041','1042','1043','1044','1045','1046','1047','1048'] : Array.from({length:n},(_,k)=>pre+String(2+k*3).padStart(2,'0'))};
+      buses: isTen ? ['1041','1043','1045','1047','1048'] : Array.from({length:n},(_,k)=>pre+String(2+k*3).padStart(2,'0'))};
   });
 }
 if(REAL) pickRealRoutes();
@@ -793,7 +793,7 @@ function buildFleet(){
   DEFS().forEach(def=>{
     const r = routes[def.id]; const n = def.buses.length; const L2 = 2*r.path.len;
     let base = R()*L2;
-    if(def.id==='10'){ base = (incD - SPEED*10.5) - (6/n)*L2; }
+    if(def.id==='10'){ base = (incD - SPEED*10.5) - (def.buses.indexOf('1047')/n)*L2; }
     def.buses.forEach((id,k)=>{
       const m = MODELS[Math.floor(R()*MODELS.length)];
       const jitter = def.id==='10' ? 0 : (R()-.5)*0.06*L2/n;
@@ -825,8 +825,12 @@ function placeReservesReal(){
   const others = Object.keys(routes).filter(id=>id!=='10');
   const at = (dx,dy) => toLL([ixy[0]+dx, ixy[1]+dy]);
   const byId = id => reserves.find(r=>r.id===id);
-  const free = snapTo(at(-1300,-250), others);
-  Object.assign(byId('2210'), {ll:free.ll, place:`Резервная площадка у ост. «${nearestStopAny(free.ll, others).name}»`});
+  /* свободный резерв — остановка соседнего маршрута в стороне от линии 10, примерно в 700 м от аварии */
+  let freeSt = null;
+  others.forEach(id=> routes[id].stops.forEach(st=>{ const off = hav(pointAt(routes['10'].path, project(routes['10'].path, st.ll)).ll, st.ll); if(off < 150) return;
+    const k = Math.abs(hav(st.ll, inc) - 700); if(!freeSt || k < freeSt.k) freeSt = {st, k}; }));
+  const free = freeSt ? {ll:freeSt.st.ll} : snapTo(at(-700,-200), others);
+  Object.assign(byId('2210'), {ll:free.ll, place:`Резервная площадка у ост. «${freeSt ? freeSt.st.name : nearestStopAny(free.ll, others).name}»`});
   const busyRoute = DEFS().find(d=>d.id!=='10').id;
   const busy = snapTo(at(1500,900), [busyRoute]);
   Object.assign(byId('1088'), {ll:busy.ll, busyRoute, place:`М${busyRoute} · межрейсовый отстой у ост. «${nearestStopAny(busy.ll,[busyRoute]).name}»`, impact:`Интервал на М${busyRoute} вырастет с 12 до 17 мин`});
@@ -1776,7 +1780,7 @@ function renderUX(){
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="card"><h5>Горячие клавиши</h5><div class="keys"><span class="kbd">Enter</span><span>Решить аварию / назначить выбранный борт</span><span class="kbd">1–4</span><span>Выбрать кандидата в окне замены</span><span class="kbd">Esc</span><span>Закрыть панель, снять выделение маршрута</span><span class="kbd">/</span><span>Поиск по борту, маршруту или остановке</span></div></div>
-      <div class="card"><h5>Допущения прототипа</h5><ul><li>Опорные точки маршрутов и названия остановок правдоподобны, но не повторяют bus62.ru точь-в-точь.</li><li>Подложка — Яндекс Карты (JS API 2.1), трассы строятся маршрутизатором Яндекса по реальным улицам. Без доступа к API показывается собственная векторная схема города.</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
+      <div class="card"><h5>Допущения прототипа</h5><ul><li>Трассы и остановки маршрута 10 и шести соседних взяты с bus62.ru. Бортовые номера, водители, резерв и отклонения от графика смоделированы.</li><li>Подложка — Яндекс Карты (JS API 2.1), трассы строятся маршрутизатором Яндекса по реальным улицам. Без доступа к API показывается собственная векторная схема города.</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
     </div>
   </section>
   </div>`;

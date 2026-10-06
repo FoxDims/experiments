@@ -1,6 +1,10 @@
 """Извлекает трассы и остановки маршрутов из HAR-записей сайта bus62.ru.
 
-python3 tools/extract_bus62.py data/routes.json file1.har [file2.har ...]
+python3 tools/extract_bus62.py data/routes.json file1.har [file2.har ...] [10=nodes1.json,nodes2.json ...]
+
+Аргумент вида «10=a.json,b.json» — сохранённые из браузера ответы getRouteNodes
+для маршрута с этим номером (если сайт взял трассу из кэша и её нет в HAR).
+У такого маршрута недостающие остановки добираются у соседних маршрутов на тех же улицах.
 
 Берёт:
   getRouteNodes      — трасса направления маршрута (rid);
@@ -37,7 +41,9 @@ def rdp(pts, eps):
     if dmax <= eps: return [a, b]
     return rdp(pts[:idx+1], eps)[:-1] + rdp(pts[idx:], eps)
 
-out_path, hars = sys.argv[1], sys.argv[2:]
+out_path = sys.argv[1]
+hars = [a for a in sys.argv[2:] if '=' not in a]
+extra = [a for a in sys.argv[2:] if '=' in a]
 rid2num, vid2rid, nodes, stops = {}, {}, {}, collections.defaultdict(dict)
 entries = []
 for f in hars:
@@ -60,10 +66,24 @@ for e in entries:
 by_num = collections.defaultdict(list)
 for rid in nodes:
     if rid in rid2num: by_num[rid2num[rid]].append(rid)
+borrow = set()
+for arg in extra:
+    num, files = arg.split('=', 1)
+    for f in files.split(','):
+        txt = open(f, encoding='utf-8').read()
+        rid = int(re.search(r'rid=(\d+)', txt).group(1))
+        data = json.loads(re.search(r'\[.*\]', txt, re.S).group(0))
+        nodes[rid] = [(n['lat']/1e6, n['lng']/1e6) for n in data]
+        rid2num[rid] = num
+    by_num[num] = [r for r in nodes if rid2num.get(r) == num]
+    borrow.add(num)
+pool = {}
+for r, st in stops.items():
+    pool.update(st)
 
 routes = []
 for num, rids in sorted(by_num.items(), key=lambda x: int(re.sub(r'\D', '', x[0]) or 0)):
-    rid = max(rids, key=lambda r: len(nodes[r]))
+    rid = max(rids, key=lambda r: (len(nodes[r]) if num not in borrow else -min(dist(nodes[r][0], (54.60996, 39.660697)), 1e9)))
     path = nodes[rid]
     cum = [0]
     for i in range(1, len(path)): cum.append(cum[-1] + dist(path[i-1], path[i]))
@@ -75,6 +95,11 @@ for num, rids in sorted(by_num.items(), key=lambda x: int(re.sub(r'\D', '', x[0]
     for sid, (name, ll) in cand.items():
         off, d = project(path, cum, ll)
         if off < 60: found.append((d, name, ll))
+    if num in borrow:
+        for sid, (name, ll) in pool.items():
+            if sid in cand: continue
+            off, d = project(path, cum, ll)
+            if off < 30: found.append((d, name, ll))
     found.sort()
     clean = []
     for d, name, ll in found:
