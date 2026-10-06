@@ -2468,6 +2468,8 @@ buildRoutes();
 buildFleet();
 initMap();
 if(!REAL) rememberReserveOffsets();
+/* служебный доступ для экспорта макета (tools/) */
+window.__st = {get map(){ return map; }, routeLines, L_: L_, get REAL(){ return REAL; }};
 drawReserves();
 createBusMarkers();
 seedFeed();
