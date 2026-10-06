@@ -1600,6 +1600,8 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .broken.is-open{padding:14px}
 .cand,.is-brief .cand:not(.is-sel){padding-right:14px}
 .broken-top .chev-btn,.cand .chev-btn,.cand .chev-slot,.cand.is-sel .chev-btn{margin-right:0}
+/* lite: подсказка об отмене — строкой над кнопками */
+.dz-foot .dz-note{flex:1 1 100%;text-align:center}
 </style>
 </head>
 <body>
@@ -2755,7 +2757,7 @@ function renderDone(){
     </ol></section>
   </div>
   <div class="dz-foot">
-    <div class="dz-sum" style="flex:1 1 0">Назначение можно отменить в течение 10 секунд.</div>
+    <div class="dz-sum dz-note">Назначение можно отменить в течение 10 секунд.</div>
     <button class="btn btn-ghost btn-lg" data-act="undo">${ic('reset')}Отменить</button>
     <button class="btn btn-primary btn-lg" data-act="done" data-primary>К карте</button>
   </div>`;
