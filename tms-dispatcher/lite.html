@@ -1642,7 +1642,7 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .search-top{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:550;width:420px;max-width:calc(100% - 340px)}
 .search-top .search{width:100%;height:44px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
 .kpi-dock{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:550;max-width:calc(100% - 32px);transition:bottom .2s}
-.stage.on-yandex .kpi-dock{bottom:44px}
+.kpi-dock{--dock-base:16px;bottom:calc(var(--dock-base) + var(--dock-lift,0px))!important}
 .kpi-dock .kpis{display:flex;padding:10px 4px;border-radius:22px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:var(--shadow);margin:0!important;width:auto}
 .kpi-dock .kpi{border-left:1px solid var(--line)!important;background:none!important;box-shadow:none!important;border-radius:0;min-width:0!important;display:flex;flex-direction:column;animation:none}
 .kpi-dock .kpi:first-child{border-left:0!important}
@@ -1666,6 +1666,232 @@ body:not(.is-brief) .bp-h .chip{display:none}
 @media (max-width:1800px){ .overlay-tl{top:72px} .alert{top:128px} }
 .dz-foot:not(:has(.dz-note)){flex-wrap:nowrap}
 @media (max-width:1440px){ .dz-foot .kbd{display:none} }
+
+/* ================= Разделы: маршруты, состав, инциденты, аналитика ================= */
+.view{grid-column:2/4;grid-row:1;z-index:6;display:grid;grid-template-columns:minmax(0,1fr) var(--side-w);gap:12px;min-height:0}
+.view.is-wide{grid-template-columns:minmax(0,1fr)}
+.view.is-wide .v-detail{display:none}
+.v-main,.v-detail{background:var(--surface);border-radius:26px;box-shadow:var(--shadow-s);min-height:0;overflow:hidden}
+.v-main{display:flex;flex-direction:column}
+.v-detail{overflow:auto}
+.v-head{display:flex;align-items:center;gap:12px;padding:22px 24px 6px}
+.v-head h2{margin:0;font-size:22px;font-weight:600;letter-spacing:-.02em}
+.v-head p{margin:2px 0 0;font-size:13px;color:var(--text-3)}
+.v-back{display:none;width:40px;height:40px;border-radius:50%;background:var(--surface-2);place-items:center;color:var(--text)}
+.v-back::before{content:"";width:9px;height:9px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateX(2px) rotate(45deg)}
+.v-tools{display:flex;align-items:center;gap:12px;padding:12px 24px 14px;flex-wrap:wrap}
+.v-search{flex:1 1 260px;max-width:420px;height:42px!important;background:var(--surface-2)!important;box-shadow:none!important;border:1px solid var(--line)!important}
+.v-search input{font-size:13.5px}
+.seg{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);flex-wrap:nowrap;overflow-x:auto;max-width:100%}
+.seg button{height:32px;padding:0 14px;border-radius:999px;font-size:12.5px;font-weight:600;color:var(--text-2);white-space:nowrap}
+.seg button .num{color:var(--text-3);font-weight:600;margin-left:2px}
+.seg button[aria-pressed="true"]{background:var(--text);color:var(--surface)}
+.seg button[aria-pressed="true"] .num{color:inherit;opacity:.7}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.v-body{flex:1;overflow:auto;padding:0 14px 16px;min-height:0}
+.v-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.v-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:13px 14px;border-radius:18px;cursor:pointer;transition:background .15s,box-shadow .15s}
+.v-row:hover{background:var(--surface-2)}
+.v-row:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.v-row.is-sel{background:linear-gradient(120deg,var(--brand-soft),transparent);box-shadow:inset 0 0 0 1.5px var(--brand)}
+.v-row.is-crit{background:linear-gradient(120deg,var(--crit-soft),transparent 70%)}
+.v-row-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.v-row-main b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-row-main span{font-size:12.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-row-num{font:700 15px var(--f-num);color:var(--text);min-width:52px;text-align:right}
+.v-row-num small{font-size:11px;color:var(--text-3)}
+.v-row .sdot{margin:0 4px}
+.v-id{font:700 15px var(--f-num);min-width:44px}
+.v-row .v-id{grid-column:1}
+.v-row:has(.v-id) {grid-template-columns:auto minmax(0,1fr) auto}
+.v-empty{padding:40px 16px;text-align:center;color:var(--text-3);font-size:13.5px}
+.v-ph{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px;text-align:center;color:var(--text-3)}
+.v-ph .ic{width:36px;height:36px;opacity:.5}
+.v-ph p{margin:0;max-width:240px;font-size:13.5px;line-height:1.5}
+.v-card{padding:22px 22px 24px}
+.v-dhead{display:flex;align-items:flex-start;gap:14px;margin-bottom:18px}
+.v-dhead h3{margin:0 0 8px;font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+.rb.lg{min-width:48px;height:36px;font-size:16px;border-radius:12px}
+.v-id.lg{font-size:22px;min-width:0;padding-top:2px}
+.v-ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;flex:none}
+.v-ic.crit{background:var(--crit-soft);color:var(--crit)} .v-ic.ok{background:var(--ok-soft);color:var(--ok)} .v-ic.warn{background:var(--warn-soft);color:var(--warn)} .v-ic.brand{background:var(--brand-soft);color:var(--brand)}
+.v-kv{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin:0}
+.v-kv div{min-width:0}
+.v-kv dt{font-size:11.5px;color:var(--text-3);margin-bottom:3px}
+.v-kv dd{margin:0;font-size:14px;font-weight:500}
+.v-kv dd small{color:var(--text-3);font-size:12px;margin-left:4px}
+.v-card h4{margin:22px 0 10px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.v-term{display:flex;flex-direction:column;gap:8px;position:relative;padding-left:4px}
+.v-term span{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500}
+.v-term i{width:10px;height:10px;border-radius:50%;border:2px solid var(--brand);background:var(--surface)}
+.v-term small{color:var(--text-3);font-size:12px;padding-left:20px}
+.v-mini{list-style:none;margin:0;padding:0}
+.v-mini li{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.v-mini li:last-child{border-bottom:0}
+.v-mini li span:nth-child(2){color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-cta{width:100%;height:46px;margin-top:22px;border-radius:999px}
+.v-acts{display:flex;gap:8px;margin-top:22px}
+.v-acts .btn{flex:1;height:46px;border-radius:999px}
+.v-driver{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--surface-2);margin-bottom:18px}
+.v-driver b{display:block;font-size:14px}
+.v-driver span{font-size:12.5px;color:var(--text-3)}
+.v-meter{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;margin-top:16px;font-size:12px;color:var(--text-3)}
+.v-meter i{height:8px;border-radius:999px;background:var(--surface-3);overflow:hidden}
+.v-meter b{display:block;height:100%;border-radius:999px;background:var(--brand)}
+.v-meter b.is-low{background:var(--late-dot)}
+.v-log{list-style:none;margin:0;padding:0 0 0 6px;border-left:2px solid var(--line)}
+.v-log li{position:relative;display:grid;grid-template-columns:48px 1fr;gap:10px;padding:0 0 14px 14px}
+.v-log li::before{content:"";position:absolute;left:-7px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--brand)}
+.v-log li:first-child::before{border-color:var(--crit-dot);background:var(--crit-dot)}
+.v-log span{font:600 12.5px var(--f-num);color:var(--text-2)}
+.v-log p{margin:0;font-size:13px;line-height:1.4}
+/* аналитика */
+.an-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:2px 10px 4px}
+.an-card{border:1px solid var(--line);border-radius:22px;padding:18px 20px 20px;min-width:0}
+.an-wide{grid-column:1/-1}
+.an-card header{margin-bottom:14px}
+.an-card h3{margin:0;font-size:15px;font-weight:600}
+.an-card header p{margin:2px 0 0;font-size:12.5px;color:var(--text-3)}
+.an-card h4{margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+.an-tiles{display:flex;flex-wrap:wrap;gap:10px 28px;margin-bottom:12px}
+.an-tiles span{display:block;font-size:12px;color:var(--text-3);margin-bottom:2px}
+.an-tiles b{font:700 24px var(--f-num);letter-spacing:-.02em}
+.an-tiles b small{font-size:13px;color:var(--text-3);font-weight:500}
+.an-tiles b.is-crit{color:var(--crit)}
+.an-chart{overflow:hidden}
+.chart{display:block;max-width:100%;height:auto}
+.c-grid{stroke:var(--line);stroke-width:1}
+.c-ax{fill:var(--text-3);font:500 11px var(--f-num)}
+.c-target{stroke:var(--text-3);stroke-width:1;stroke-dasharray:4 4}
+.c-target-l{font-family:var(--f-ui);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.c-area{fill:var(--brand-soft)}
+.c-line{fill:none;stroke:var(--brand);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.c-dot{fill:var(--brand);stroke:var(--surface);stroke-width:2}
+.c-cross{stroke:var(--line-strong);stroke-width:1}
+.c-hov{fill:var(--surface);stroke:var(--brand);stroke-width:2}
+.c-bars,.c-plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.c-bars li,.c-plan li{display:grid;grid-template-columns:46px minmax(0,1fr) 52px;align-items:center;gap:10px;font-size:13px;padding:2px 0;cursor:default}
+.c-bars li>i{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.c-bars li>i b{display:block;height:100%;border-radius:999px;background:var(--brand)}
+.c-bars li:hover>i b{filter:brightness(1.1)}
+.c-bars .num,.c-plan .num{text-align:right;font-weight:600}
+.rb.rb-t{font-family:var(--f-ui);font-weight:600;font-size:11.5px;min-width:46px;justify-content:start;padding:0;background:none;place-items:center start}
+.c-bars li:has(.rb-t){grid-template-columns:96px minmax(0,1fr) 40px}
+.c-plan li>i{display:flex;gap:2px;height:12px}
+.c-plan li>i b{flex:1;max-width:44px;border-radius:4px;background:var(--brand)}
+.c-plan b.is-miss,.c-legend b.is-miss{background:repeating-linear-gradient(135deg,rgba(229,50,63,.35) 0 3px,transparent 3px 6px),var(--crit-soft);box-shadow:inset 0 0 0 1px var(--crit-line)}
+.c-legend{display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--text-2)}
+.c-legend span{display:flex;align-items:center;gap:6px}
+.c-legend b{width:14px;height:10px;border-radius:3px;background:var(--brand)}
+.tt{position:fixed;z-index:3000;pointer-events:none;background:var(--text);color:var(--surface);padding:7px 10px;border-radius:10px;font-size:12px;box-shadow:var(--shadow);max-width:280px}
+.tt b{font-weight:700}
+.rail-btn.is-active{background:var(--brand-grad)!important;color:#fff!important}
+
+/* ================= Мобильная версия (до 900 px): таб-бар, шторка событий, профиль ================= */
+.tabbar,.sheet-handle,.me-bg{display:none}
+@keyframes sheetUp{from{transform:translateY(100%)}}
+@media (max-width:900px){
+  :root{--tab-h:calc(64px + env(safe-area-inset-bottom,0px));--peek:140px}
+  html,body{overflow:hidden!important}
+  .app{display:block!important;margin:0!important;padding:0!important;border-radius:0!important;height:100%!important;min-height:0!important;box-shadow:none!important}
+  .rail{display:none!important}
+  /* карта — над шторкой и таб-баром */
+  .stage{position:fixed!important;left:0;right:0;top:0;bottom:calc(var(--tab-h) + var(--peek) - 22px);height:auto!important;min-height:0!important;border-radius:0!important;box-shadow:none!important}
+  .search-top{left:12px!important;right:12px;top:calc(12px + env(safe-area-inset-top,0px))!important;transform:none!important;width:auto!important;max-width:none!important}
+  .overlay-tl{top:calc(66px + env(safe-area-inset-top,0px))!important;left:12px!important;right:12px;flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:none;padding:2px 0 6px}
+  .overlay-tl::-webkit-scrollbar{display:none}
+  .overlay-tl>*{flex:none}
+  .overlay-tl #tgStops>.ic,.overlay-tl #tgReserve>.ic{display:none}
+  .overlay-tl .chipbtn{padding:0 13px}
+  .lg-wrap .legend{position:fixed!important;top:calc(114px + env(safe-area-inset-top,0px))!important;left:12px!important;z-index:700}
+  .lg-wrap .legend:not([hidden]){display:flex!important}
+  .overlay-tr{top:calc(116px + env(safe-area-inset-top,0px))!important;right:12px!important}
+  .app:has(#side:not([data-sheet="peek"])) .alert{display:none!important}
+  .mapctl{display:none!important}
+  .basemap-sw{display:flex!important}
+  .alert{top:calc(116px + env(safe-area-inset-top,0px))!important;left:12px!important;right:12px;width:auto!important;transform:none!important}
+  .kpi-dock{--dock-base:30px;left:12px!important;right:12px;transform:none!important;max-width:none!important;overflow-x:auto;scrollbar-width:none;border-radius:20px}
+  .kpi-dock::-webkit-scrollbar{display:none}
+  .kpi-dock .kpis{width:max-content!important;padding:8px 2px!important}
+  .kpi-dock .kpi{padding:0 12px!important}
+  .kpi-dock .kpi-v{font-size:18px!important}
+  .kpi-dock .kpi-l{font-size:11px!important}
+  .kpi-dock .kpi.k-reg .spark{width:36px!important}
+  .toast{bottom:calc(var(--peek) + 60px)!important;max-width:calc(100% - 24px)}
+  /* правая колонка → шторка над картой */
+  .side{position:fixed!important;left:0;right:0;bottom:var(--tab-h);z-index:800;height:var(--peek);min-height:0!important;border-radius:22px 22px 0 0!important;box-shadow:0 -12px 32px -14px rgba(22,18,31,.28)!important;border:0!important;transition:height .3s cubic-bezier(.2,.8,.2,1)}
+  .side[data-sheet="half"]{height:56%}
+  .side[data-sheet="full"]{height:calc(100% - var(--tab-h) - 52px - env(safe-area-inset-top,0px))}
+  .side.is-drag{transition:none}
+  .sheet-handle{display:flex;justify-content:center;align-items:center;height:22px;width:100%;flex:none;touch-action:none;cursor:grab}
+  .sheet-handle i{width:40px;height:5px;border-radius:3px;background:var(--line-strong)}
+  .side .tabs{padding-top:0!important}
+  .side-foot{display:none!important}
+  /* окно замены — во весь экран */
+  .drawer{position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;border-radius:0!important;z-index:2500}
+  .dz-head{padding-top:calc(14px + env(safe-area-inset-top,0px))!important}
+  .dz-foot{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important}
+  .dz-foot .kbd{display:none}
+  /* разделы — во весь экран над таб-баром */
+  .view{position:fixed!important;left:0;right:0;top:0;bottom:var(--tab-h);z-index:850;display:flex!important;flex-direction:column;gap:0;background:var(--surface)}
+  .view[hidden]{display:none!important}
+  .v-main,.v-detail{border-radius:0!important;box-shadow:none!important}
+  .v-main{flex:1;min-height:0}
+  .v-head{padding:calc(14px + env(safe-area-inset-top,0px)) 16px 2px}
+  .v-head h2{font-size:20px}
+  .v-tools{padding:10px 16px 12px;gap:8px}
+  .v-search{flex:1 1 100%;max-width:none}
+  .seg{width:100%}
+  .seg button{flex:1 0 auto;padding:0 12px}
+  .v-body{padding:0 6px 16px}
+  .v-detail{display:none!important}
+  .view.has-detail .v-main{flex:none}
+  .view.has-detail .v-tools,.view.has-detail .v-body{display:none}
+  .view.has-detail .v-detail{display:block!important;flex:1;min-height:0}
+  .view.has-detail .v-back{display:grid}
+  .v-card{padding:6px 16px 24px}
+  .v-row,.v-row:has(.v-id){grid-template-columns:auto minmax(0,1fr) auto!important;gap:12px;padding:12px 10px}
+  .v-row-num{display:none}
+  .v-row .chip{max-width:132px;overflow:hidden;text-overflow:ellipsis;display:block;line-height:22px}
+  .an-grid{grid-template-columns:1fr;padding:0 10px}
+  .an-wide{grid-column:auto}
+  .an-card{padding:16px}
+  .an-tiles{gap:10px 20px}
+  .an-tiles b{font-size:20px}
+  .c-bars li:has(.rb-t){grid-template-columns:92px minmax(0,1fr) 28px}
+  /* таб-бар */
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;height:var(--tab-h);padding:6px 4px env(safe-area-inset-bottom,0px);background:var(--surface);border-top:1px solid var(--line);z-index:900}
+  .tabbar button{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--text-3);min-width:0}
+  .tabbar button .ic{width:22px;height:22px}
+  .tabbar b{font-size:10.5px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tabbar button.is-active{color:var(--brand)}
+  .tabbar button.is-active::before{content:"";position:absolute;top:3px;left:50%;width:48px;height:30px;margin-left:-24px;border-radius:999px;background:var(--brand-soft);z-index:-1}
+  .tabbar .dot{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:var(--crit-dot);color:#fff;font:700 10px/16px var(--f-num);text-align:center;box-shadow:0 0 0 2px var(--surface)}
+  .tab-me .avatar{width:28px!important;height:28px!important;font-size:10.5px!important;margin:0!important;box-shadow:none!important}
+  .tab-me[aria-expanded="true"]{color:var(--brand)}
+  /* профиль и настройки */
+  .me-bg{display:flex;align-items:flex-end;position:fixed;inset:0;z-index:2800;background:rgba(10,8,18,.42)}
+  .me-bg[hidden]{display:none}
+  .me-sheet{width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:8px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow-l);animation:sheetUp .28s cubic-bezier(.2,.8,.2,1)}
+  .me-grip{display:block;width:40px;height:5px;border-radius:3px;background:var(--line-strong);margin:4px auto 14px}
+  .me-user{display:flex;align-items:center;gap:12px;padding:0 4px 16px;border-bottom:1px solid var(--line)}
+  .me-user .avatar{width:48px!important;height:48px!important;margin:0!important;font-size:15px}
+  .me-user b{display:block;font-size:16px}
+  .me-user span{font-size:13px;color:var(--text-3)}
+  .me-row{display:flex;align-items:center;gap:14px;width:100%;padding:15px 4px;font-size:15px;color:var(--text);border-bottom:1px solid var(--line);text-align:left}
+  .me-row>span:nth-child(2){flex:1}
+  .me-row .ic{color:var(--text-2)}
+  .sw{flex:none;width:46px;height:28px;border-radius:999px;background:var(--surface-3);position:relative;transition:background .2s}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+  .sw.on{background:var(--brand)}
+  .sw.on::after{transform:translateX(18px)}
+  .me-go{flex:none;width:9px;height:9px;border-right:2px solid var(--text-3);border-top:2px solid var(--text-3);transform:rotate(45deg);margin-right:6px}
+  .me-close{width:100%;height:48px;margin-top:14px;border-radius:999px}
+  .ux{z-index:3000!important}
+}
+@media (max-width:900px) and (prefers-reduced-motion:reduce){ .side,.me-sheet{transition:none;animation:none} }
+/* поиск в lite виден на любой ширине (старое правило прятало его на экранах уже 1180 px) */
+.search-top .search,.v-tools .search{display:flex!important}
 </style>
 </head>
 <body>
@@ -1682,11 +1908,11 @@ body:not(.is-brief) .bp-h .chip{display:none}
       <circle cx="38" cy="10" r="8.5" fill="#F04A55" stroke="var(--surface)" stroke-width="3"/>
       <path d="M38 6.3V10l2.6 1.6" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <button class="rail-btn is-active" aria-current="page"><span data-ic="map"></span><span class="tip">Оперативная карта</span></button>
-    <button class="rail-btn" data-stub><span data-ic="route"></span><span class="tip">Маршруты и расписания</span></button>
-    <button class="rail-btn" data-stub><span data-ic="bus"></span><span class="tip">Подвижной состав</span></button>
-    <button class="rail-btn" id="railInc"><span data-ic="alert"></span><span class="tip">Инциденты</span><span class="dot" id="railDot" hidden>1</span></button>
-    <button class="rail-btn" data-stub><span data-ic="chart"></span><span class="tip">Аналитика</span></button>
+    <button class="rail-btn is-active" aria-current="page" data-view="map"><span data-ic="map"></span><span class="tip">Оперативная карта</span></button>
+    <button class="rail-btn" data-view="routes"><span data-ic="route"></span><span class="tip">Маршруты и расписания</span></button>
+    <button class="rail-btn" data-view="fleet"><span data-ic="bus"></span><span class="tip">Подвижной состав</span></button>
+    <button class="rail-btn" id="railInc" data-view="incidents"><span data-ic="alert"></span><span class="tip">Инциденты</span><span class="dot" id="railDot" hidden>1</span></button>
+    <button class="rail-btn" data-view="analytics"><span data-ic="chart"></span><span class="tip">Аналитика</span></button>
     <div class="rail-spacer"></div>
     <button class="rail-btn" id="uxBtn"><span data-ic="book"></span><span class="tip">UX-логика прототипа</span></button>
     <button class="rail-btn" id="soundBtn" aria-pressed="true"><span data-ic="volume"></span><span class="tip">Звук аварий: вкл</span></button>
@@ -1737,7 +1963,8 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <div class="toast" id="toast" role="status"></div>
   </main>
 
-  <aside class="side" aria-label="События и маршруты">
+  <aside class="side" aria-label="События и маршруты" id="side" data-sheet="peek">
+    <button class="sheet-handle" id="sheetHandle" aria-label="Развернуть или свернуть события"><i></i></button>
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" aria-selected="true" data-tab="feed">События <span class="cnt" id="feedCnt">0</span></button>
       <button class="tab" role="tab" aria-selected="false" data-tab="routes">Маршруты <span class="cnt" id="routesCnt">0</span></button>
@@ -1754,10 +1981,38 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <div class="side-foot"><span class="live"></span>Телеметрия: обновление каждую секунду</div>
   </aside>
 
+  <section class="view" id="view" hidden aria-live="polite">
+    <div class="v-main">
+      <header class="v-head"><button class="v-back" data-vback aria-label="Назад к списку"></button><div class="v-title"><h2 id="vTitle"></h2><p id="vSub"></p></div></header>
+      <div class="v-tools" id="vTools"></div>
+      <div class="v-body" id="vBody"></div>
+    </div>
+    <aside class="v-detail" id="vDetail"></aside>
+  </section>
+  <div class="tt" id="tt" role="tooltip" hidden></div>
+
   <section class="drawer" id="drawer" aria-label="Замена автобуса" aria-hidden="true"></section>
 </div>
 
 <div class="ux" id="ux" hidden></div>
+<nav class="tabbar" aria-label="Разделы">
+  <button data-view="map" class="is-active"><span data-ic="map"></span><b>Карта</b></button>
+  <button data-view="routes"><span data-ic="route"></span><b>Маршруты</b></button>
+  <button data-view="fleet"><span data-ic="bus"></span><b>Состав</b></button>
+  <button data-view="incidents"><span data-ic="alert"></span><b>Инциденты</b><span class="dot" id="tabDot" hidden>1</span></button>
+  <button data-view="analytics"><span data-ic="chart"></span><b>Аналитика</b></button>
+  <button class="tab-me" id="meBtn" aria-haspopup="dialog"><span class="avatar">АМ</span><b>Профиль</b></button>
+</nav>
+<div class="me-bg" id="meBg" hidden>
+  <div class="me-sheet" role="dialog" aria-modal="true" aria-label="Профиль и настройки">
+    <i class="me-grip"></i>
+    <div class="me-user"><span class="avatar">АМ</span><div><b>Морозова А. С.</b><span id="meShift">Старший диспетчер</span></div></div>
+    <button class="me-row" data-me="theme"><span data-ic="moon"></span><span>Тёмная тема</span><i class="sw" id="meThemeSw"></i></button>
+    <button class="me-row" data-me="sound"><span data-ic="volume"></span><span>Звук аварий</span><i class="sw" id="meSoundSw"></i></button>
+    <button class="me-row" data-me="help"><span data-ic="book"></span><span>Помощь · как устроен прототип</span><i class="me-go"></i></button>
+    <button class="btn btn-ghost me-close" data-me="close">Закрыть</button>
+  </div>
+</div>
 
 <script>window.ROUTE_DATA = {"source":"bus62.ru","routes":[{"id":"6","rid":453,"path":[[54.598004,39.827549],[54.597845,39.82798],[54.599132,39.829684],[54.599266,39.829724],[54.599383,39.829636],[54.59946,39.829411],[54.599422,39.829109],[54.600245,39.827128],[54.604168,39.81849],[54.604962,39.817519],[54.607044,39.815501],[54.607272,39.8151],[54.607982,39.813414],[54.608282,39.812482],[54.608504,39.811449],[54.612343,39.791826],[54.617124,39.794933],[54.617347,39.795113],[54.617814,39.795727],[54.618772,39.796373],[54.619715,39.791158],[54.619941,39.790213],[54.620925,39.786863],[54.622129,39.78355],[54.620642,39.781783],[54.617027,39.758384],[54.606237,39.763242],[54.597205,39.76745],[54.58954,39.77078],[54.589322,39.770562],[54.588321,39.768562],[54.586887,39.766459],[54.586405,39.765422],[54.586246,39.764503],[54.58606,39.762591],[54.586162,39.761107],[54.586843,39.755087],[54.586789,39.753432],[54.58682,39.752333],[54.587092,39.750669],[54.586928,39.749809],[54.586405,39.748377],[54.585984,39.747739],[54.585688,39.747433],[54.585287,39.747181],[54.577511,39.744254],[54.576656,39.743834],[54.581214,39.708262],[54.58144,39.707328],[54.581797,39.706875],[54.58217,39.706753],[54.582348,39.706787],[54.595406,39.711741],[54.609552,39.712716],[54.609511,39.71481],[54.609567,39.715105],[54.611869,39.719458],[54.606637,39.727806],[54.60625,39.729648],[54.606056,39.7312],[54.605183,39.73513],[54.60444,39.738968]],"stops":[{"name":"ДСК","ll":[54.600537,39.765746]},{"name":"Автоцентр","ll":[54.596311,39.767734]},{"name":"Завод «Рязцветмет»","ll":[54.591232,39.769874]},{"name":"ОЭМЗ института «Гинцветмет»","ll":[54.587134,39.766688]},{"name":"П. Никуличи","ll":[54.586842,39.755777]},{"name":"Окружная дорога","ll":[54.585275,39.747019]},{"name":"БЦ Олимп","ll":[54.581007,39.745482]},{"name":"Нефтезавод","ll":[54.57685,39.742924]},{"name":"Трест «Нефтехим»","ll":[54.577982,39.73403]},{"name":"Пов. к заводу «Центролит»","ll":[54.579816,39.719663]},{"name":"П. Сысоево","ll":[54.582906,39.707124]},{"name":"Московское шоссе","ll":[54.587505,39.708859]},{"name":"П. Южный","ll":[54.59572,39.711855]},{"name":"Севастопольская аллея","ll":[54.59868,39.712116]},{"name":"Технологический колледж","ll":[54.602965,39.71236]},{"name":"Ул. Островского","ll":[54.60597,39.712606]},{"name":"Полетаевский рынок","ll":[54.609451,39.713899]},{"name":"Ул. Братиславская","ll":[54.611258,39.720267]},{"name":"Городская больница №6","ll":[54.6064,39.72845]},{"name":"Мкр. Братиславский","ll":[54.604504,39.738144]}],"lengthM":20222},{"id":"7","rid":367,"path":[[54.533334,39.78496],[54.545355,39.783739],[54.54626,39.78382],[54.550992,39.785361],[54.556819,39.786192],[54.557627,39.786273],[54.558289,39.786187],[54.558766,39.785961],[54.55996,39.785142],[54.562827,39.782237],[54.563515,39.781801],[54.563982,39.781705],[54.566728,39.781917],[54.567544,39.78188],[54.568461,39.781614],[54.569309,39.781163],[54.57822,39.773823],[54.579567,39.772804],[54.580132,39.772509],[54.581575,39.772077],[54.588481,39.771199],[54.589775,39.770747],[54.596748,39.767768],[54.603963,39.76441],[54.608927,39.762272],[54.610082,39.761626],[54.621134,39.756636],[54.622106,39.755975],[54.631568,39.7402],[54.629355,39.736009],[54.629278,39.735821],[54.629236,39.735344],[54.629216,39.733427],[54.629325,39.7252],[54.6294,39.724319],[54.629413,39.722613],[54.629255,39.721503],[54.629031,39.712148],[54.629053,39.711126],[54.629316,39.709822],[54.632973,39.697985],[54.633668,39.695958],[54.639084,39.678556],[54.638923,39.678511],[54.635733,39.67599],[54.633845,39.674402],[54.633462,39.673924],[54.632966,39.672859],[54.63368,39.671305],[54.636593,39.662999],[54.636931,39.661895],[54.638178,39.655046],[54.631066,39.654408],[54.630871,39.654241],[54.630687,39.653755],[54.630716,39.650833],[54.634419,39.651125],[54.634572,39.651122],[54.634871,39.650803],[54.63501,39.650779],[54.635661,39.651048],[54.635818,39.650167]],"stops":[{"name":"ТД \"Барс\"","ll":[54.632435,39.700051]},{"name":"ТРЦ \"Премьер\"","ll":[54.635764,39.689684]},{"name":"Автовокзал","ll":[54.638055,39.677719]},{"name":"Ростелеком","ll":[54.633593,39.674058]},{"name":"7-й мервинский проезд","ll":[54.634896,39.668058]},{"name":"Больница №10","ll":[54.636785,39.662701]},{"name":"Сельхозакадемия","ll":[54.6364,39.65473]},{"name":"Детская поликлиника №6","ll":[54.633173,39.654491]},{"name":"Мальшинская богодельня","ll":[54.631384,39.65094]},{"name":"Новаторов","ll":[54.635315,39.650961]}],"lengthM":19791},{"id":"10","rid":484,"path":[[54.60996,39.660697],[54.609754,39.660896],[54.609569,39.660661],[54.608979,39.661161],[54.608155,39.662272],[54.607765,39.664096],[54.60721,39.665026],[54.607402,39.665859],[54.607752,39.666871],[54.607732,39.667177],[54.607562,39.667567],[54.605956,39.669698],[54.607012,39.672808],[54.607442,39.673285],[54.613251,39.676556],[54.613094,39.677378],[54.614238,39.678273],[54.614785,39.679546],[54.61753,39.686997],[54.61769,39.687473],[54.617955,39.688713],[54.616648,39.692427],[54.617278,39.69346],[54.621164,39.704525],[54.618551,39.708781],[54.621351,39.713986],[54.621447,39.715087],[54.623562,39.719064],[54.624827,39.717027],[54.625172,39.716677],[54.625519,39.716553],[54.629027,39.71626],[54.629162,39.721512],[54.629247,39.722857],[54.62911,39.735801],[54.632943,39.74309],[54.632928,39.743384],[54.63305,39.743632],[54.63317,39.743559],[54.633255,39.743358],[54.633105,39.743049]],"stops":[{"name":"пос. Мехзавода","ll":[54.609804,39.660974]},{"name":"Кирпичный завод","ll":[54.607819,39.667079]},{"name":"Керамзавод","ll":[54.606941,39.672301]},{"name":"Магазин","ll":[54.608642,39.673819]},{"name":"Автоинститут","ll":[54.61194,39.67567]},{"name":"Октябрьский городок","ll":[54.614537,39.678816]},{"name":"Завод ЖБИ-2","ll":[54.617575,39.686865]},{"name":"УРТ","ll":[54.624526,39.717182]},{"name":"Кинотеатр \"Дружба\"","ll":[54.627689,39.716195]},{"name":"Гост. «Первомайская»","ll":[54.629271,39.718877]},{"name":"Дом художника","ll":[54.629127,39.725283]},{"name":"Пл. Ленина","ll":[54.629299,39.734842]},{"name":"Детский мир","ll":[54.630907,39.738745]}],"lengthM":7972},{"id":"11","rid":10,"path":[[54.621134,39.756636],[54.622106,39.755975],[54.631568,39.7402],[54.629278,39.735821],[54.629216,39.733427],[54.629325,39.7252],[54.6294,39.724319],[54.633822,39.724237],[54.634204,39.724011],[54.63482,39.723453],[54.635503,39.723113],[54.637061,39.723086],[54.637448,39.722703],[54.637551,39.722398],[54.639008,39.720208],[54.639581,39.719676],[54.640934,39.718788],[54.64175,39.718431],[54.643094,39.718267],[54.644019,39.717947],[54.645494,39.717631],[54.647778,39.716897],[54.650015,39.715329],[54.652431,39.713269],[54.653331,39.712777],[54.654322,39.712595],[54.654553,39.712477],[54.654803,39.712189],[54.656215,39.713503],[54.658033,39.715408],[54.660104,39.718106],[54.660385,39.71733],[54.663429,39.706277],[54.663814,39.704214],[54.66376,39.703807],[54.663811,39.703367],[54.664214,39.70178],[54.664184,39.701497],[54.664091,39.701421],[54.662006,39.700624],[54.661844,39.700642],[54.66156,39.70092],[54.661191,39.700926],[54.661082,39.701001],[54.661092,39.701237]],"stops":[{"name":"Детский мир","ll":[54.630907,39.738745]},{"name":"Пл. Ленина","ll":[54.629299,39.734842]},{"name":"Дом художника","ll":[54.629377,39.72617]},{"name":"Магазин «Фаворит»","ll":[54.636347,39.723239]},{"name":"Карьероуправление","ll":[54.644423,39.717963]},{"name":"Шпалопропиточный завод","ll":[54.649681,39.715707]},{"name":"10-й район п. Борки","ll":[54.654992,39.712486]},{"name":"Борки-1","ll":[54.658368,39.716091]},{"name":"Борки-2","ll":[54.663841,39.704482]},{"name":"Детский сад №45","ll":[54.661018,39.701041]}],"lengthM":7965},{"id":"16","rid":457,"path":[[54.598004,39.827549],[54.597845,39.82798],[54.599132,39.829684],[54.599266,39.829724],[54.599383,39.829636],[54.59946,39.829411],[54.599422,39.829109],[54.600245,39.827128],[54.604168,39.81849],[54.604962,39.817519],[54.607044,39.815501],[54.607272,39.8151],[54.607982,39.813414],[54.608282,39.812482],[54.608504,39.811449],[54.612343,39.791826],[54.617124,39.794933],[54.617347,39.795113],[54.617814,39.795727],[54.618772,39.796373],[54.619715,39.791158],[54.619941,39.790213],[54.620925,39.786863],[54.622129,39.78355],[54.620654,39.781858],[54.620446,39.780839],[54.617958,39.764306],[54.617022,39.758494],[54.621134,39.756636],[54.62197,39.756076],[54.615987,39.745157],[54.614828,39.742911],[54.614808,39.742376],[54.61527,39.740112],[54.615469,39.739805],[54.616405,39.738804],[54.618078,39.735956],[54.618213,39.735686],[54.618353,39.735151],[54.618347,39.734557],[54.617273,39.729306],[54.614919,39.725017],[54.609628,39.715043],[54.609576,39.714633],[54.609648,39.712516],[54.602682,39.712037],[54.601959,39.712141],[54.601133,39.712095],[54.595237,39.711675],[54.596937,39.698531],[54.593905,39.697433],[54.593575,39.699624],[54.593337,39.701901]],"stops":[{"name":"Новосёлов, 60","ll":[54.597976,39.82752]},{"name":"Новосёлов, 54","ll":[54.600448,39.826244]},{"name":"Сбербанк","ll":[54.603717,39.81909]},{"name":"Шереметьево","ll":[54.607113,39.814702]},{"name":"Стоматологическая поликлиника","ll":[54.608494,39.810193]},{"name":"Горбольница №11","ll":[54.609903,39.802962]},{"name":"Кинотеатр «Октябрь»","ll":[54.61103,39.797278]},{"name":"Ул. Новосёлов","ll":[54.612025,39.792448]},{"name":"Ул. Советской Армии","ll":[54.615492,39.793746]},{"name":"Касимовское шоссе","ll":[54.619167,39.793588]},{"name":"Кальное","ll":[54.620984,39.786421]},{"name":"Ул. Гражданская","ll":[54.620413,39.781033]},{"name":"Автобусный парк","ll":[54.619226,39.773345]},{"name":"Автошкола ДОСААФ","ll":[54.61834,39.767546]},{"name":"Ул. Циолковского","ll":[54.617059,39.75918]},{"name":"Пл. Театральная","ll":[54.620389,39.756697]},{"name":"Приобанк","ll":[54.619925,39.753057]},{"name":"Завод САМ","ll":[54.617078,39.74788]},{"name":"Спортивная","ll":[54.615264,39.739804]},{"name":"Больница им. Семашко","ll":[54.61807,39.733882]},{"name":"Радиоуниверситет","ll":[54.614361,39.724266]},{"name":"Полетаевский рынок","ll":[54.609451,39.713899]},{"name":"Институт ВНИИМСХ","ll":[54.595554,39.709857]},{"name":"Ул. Щорса","ll":[54.596494,39.70257]},{"name":"пос. Южный","ll":[54.596954,39.699037]},{"name":"СПТУ-6","ll":[54.593319,39.701025]}],"lengthM":13943},{"id":"20","rid":461,"path":[[54.613135,39.818182],[54.612892,39.818496],[54.612977,39.818634],[54.612948,39.819394],[54.614566,39.819373],[54.61557,39.814405],[54.616771,39.807872],[54.619715,39.791158],[54.620827,39.787163],[54.622129,39.78355],[54.620592,39.781751],[54.617042,39.758453],[54.621134,39.756636],[54.62197,39.756076],[54.617819,39.748487],[54.61935,39.745788],[54.620294,39.745702],[54.620294,39.744071],[54.621661,39.741497],[54.624444,39.736733],[54.626456,39.733514],[54.628568,39.733686],[54.629221,39.733578],[54.629325,39.7252],[54.6294,39.724319],[54.629413,39.722613],[54.629255,39.721503],[54.629123,39.716324],[54.629069,39.71617],[54.625407,39.716419],[54.625002,39.716667],[54.624793,39.716915],[54.617217,39.729208],[54.614919,39.725017],[54.609628,39.715043],[54.609575,39.71479],[54.609615,39.712717],[54.609792,39.710937],[54.609954,39.710208],[54.610504,39.709001],[54.610538,39.708743],[54.607254,39.70287],[54.609665,39.698832],[54.615255,39.694046],[54.615695,39.694332],[54.615791,39.693983],[54.616561,39.692652],[54.617955,39.688713],[54.61769,39.687473],[54.61753,39.686997],[54.614785,39.679546],[54.614397,39.678632],[54.614238,39.678273],[54.613094,39.677378],[54.613251,39.676556],[54.607442,39.673285],[54.607012,39.672808],[54.605956,39.669698],[54.607562,39.667567],[54.607732,39.667177],[54.607752,39.666871],[54.607402,39.665859],[54.60721,39.665026],[54.607765,39.664096],[54.608155,39.662272],[54.608979,39.661161],[54.609569,39.660661],[54.609754,39.660896],[54.60996,39.660697]],"stops":[{"name":"Микрорайон №1","ll":[54.613044,39.818165]},{"name":"Касимовское шоссе","ll":[54.619167,39.793588]},{"name":"Кальное","ll":[54.620984,39.786421]},{"name":"Ул. Гражданская","ll":[54.620413,39.781033]},{"name":"Автобусный парк","ll":[54.619226,39.773345]},{"name":"Автошкола ДОСААФ","ll":[54.61834,39.767546]},{"name":"Ул. Циолковского","ll":[54.617059,39.75918]},{"name":"Пл. Театральная","ll":[54.620389,39.756697]},{"name":"Приобанк","ll":[54.619925,39.753057]},{"name":"Пл. Мичурина","ll":[54.619306,39.745061]},{"name":"Стадион «Спартак»","ll":[54.62187,39.741438]},{"name":"Центр. рынок","ll":[54.624405,39.736634]},{"name":"Медуниверситет","ll":[54.626638,39.733681]},{"name":"Дом художника","ll":[54.629377,39.72617]},{"name":"Гост. «Первомайская»","ll":[54.62905,39.719604]},{"name":"Кинотеатр \"Дружба\"","ll":[54.627689,39.716195]},{"name":"УРТ","ll":[54.625534,39.716713]},{"name":"Музучилище","ll":[54.623133,39.719954]},{"name":"Ул. Стройкова","ll":[54.62051,39.723622]},{"name":"Ул. Гагарина","ll":[54.617857,39.727989]},{"name":"Радиоуниверситет","ll":[54.614361,39.724266]},{"name":"Полетаевский рынок","ll":[54.609953,39.715468]},{"name":"Дворец молодёжи","ll":[54.609823,39.711279]},{"name":"Кардиологический диспансер","ll":[54.608507,39.704954]},{"name":"Ул. Ленинского комсомола","ll":[54.608704,39.700526]},{"name":"Лицей №7","ll":[54.613078,39.696033]},{"name":"Ул. Строителей","ll":[54.616026,39.693844]},{"name":"Завод ЖБИ-2","ll":[54.617575,39.686865]},{"name":"Октябрьский городок","ll":[54.614537,39.678816]},{"name":"Автоинститут","ll":[54.61194,39.67567]},{"name":"Магазин","ll":[54.608642,39.673819]},{"name":"Керамзавод","ll":[54.606941,39.672301]},{"name":"Кирпичный завод","ll":[54.607819,39.667079]},{"name":"пос. Мехзавода","ll":[54.609804,39.660974]}],"lengthM":16837},{"id":"30","rid":409,"path":[[54.690755,39.62468],[54.690332,39.624773],[54.690068,39.624985],[54.686549,39.629644],[54.684419,39.624322],[54.671339,39.641707],[54.671149,39.641876],[54.670993,39.641889],[54.670769,39.641681],[54.670411,39.640976],[54.670149,39.64093],[54.667936,39.643771],[54.665359,39.638019],[54.658163,39.647665],[54.650363,39.65793],[54.649988,39.65859],[54.648472,39.663041],[54.644815,39.660169],[54.642016,39.668511],[54.629158,39.710026],[54.628928,39.711448],[54.629024,39.716152],[54.625407,39.716419],[54.625002,39.716667],[54.62124,39.722618],[54.617217,39.729208],[54.614919,39.725017],[54.609628,39.715043],[54.609576,39.714633],[54.609648,39.712516],[54.60251,39.712054],[54.602633,39.705885],[54.603061,39.703459],[54.602633,39.705885],[54.60251,39.712054],[54.601959,39.712141],[54.598135,39.711896],[54.597731,39.713318],[54.596846,39.71761],[54.598789,39.720488],[54.598753,39.721359]],"stops":[{"name":"Автовокзал","ll":[54.639151,39.677424]},{"name":"ТРЦ \"Премьер\"","ll":[54.635725,39.688719]},{"name":"ТД \"Барс\"","ll":[54.632455,39.699088]},{"name":"Ул. Вокзальная","ll":[54.630221,39.706378]},{"name":"Пл. Победы","ll":[54.62886,39.712025]},{"name":"Кинотеатр \"Дружба\"","ll":[54.627689,39.716195]},{"name":"УРТ","ll":[54.624526,39.717182]},{"name":"Музучилище","ll":[54.622773,39.720001]},{"name":"Ул. Стройкова","ll":[54.62051,39.723622]},{"name":"Ул. Гагарина","ll":[54.617857,39.727989]},{"name":"Радиоуниверситет","ll":[54.613799,39.722748]},{"name":"Полетаевский рынок","ll":[54.609953,39.715468]},{"name":"Ул. Черновицкая","ll":[54.608818,39.712325]},{"name":"Ул. Островского","ll":[54.605083,39.7121]},{"name":"Технологический колледж","ll":[54.602983,39.711917]},{"name":"БСМП","ll":[54.603012,39.703932]},{"name":"Севастопольская аллея","ll":[54.599305,39.711778]},{"name":"Берёзовая улица, 12","ll":[54.597154,39.718118]},{"name":"Ул. Берёзовая","ll":[54.598674,39.720999]}],"lengthM":16953},{"id":"32","rid":25,"path":[[54.614518,39.678932],[54.61753,39.686997],[54.61769,39.687473],[54.617955,39.688713],[54.616648,39.692427],[54.616293,39.693133],[54.609665,39.698832],[54.607254,39.70287],[54.610538,39.708743],[54.609893,39.710099],[54.609776,39.710599],[54.609552,39.712716],[54.609511,39.71481],[54.609567,39.715105],[54.615062,39.725444],[54.617179,39.729274],[54.618287,39.734631],[54.618249,39.735268],[54.61802,39.73589],[54.61626,39.738865],[54.615205,39.740046],[54.61475,39.742366],[54.614762,39.742975],[54.6155,39.744329],[54.615911,39.745453],[54.61764,39.748789],[54.621679,39.756075],[54.62102,39.756568],[54.617009,39.758387],[54.620549,39.781487],[54.620724,39.781912],[54.622129,39.78355],[54.620925,39.786863],[54.619941,39.790213],[54.619715,39.791158],[54.618772,39.796373],[54.617814,39.795727],[54.617347,39.795113],[54.617124,39.794933],[54.612214,39.791722],[54.608239,39.811955],[54.60776,39.813532],[54.606839,39.815532],[54.605219,39.81699],[54.604234,39.818056],[54.603515,39.81952],[54.599389,39.828655],[54.599131,39.828655],[54.598145,39.827384],[54.598004,39.827549]],"stops":[{"name":"Дворец молодёжи","ll":[54.609952,39.709742]},{"name":"Полетаевский рынок","ll":[54.609451,39.713899]},{"name":"Радиоуниверситет","ll":[54.614361,39.724266]},{"name":"Больница им. Семашко","ll":[54.61807,39.733882]},{"name":"Спортивная","ll":[54.615264,39.739804]},{"name":"Завод САМ","ll":[54.617078,39.74788]},{"name":"Приобанк","ll":[54.619925,39.753057]},{"name":"Пл. Театральная","ll":[54.620389,39.756697]},{"name":"Ул. Циолковского","ll":[54.617059,39.75918]},{"name":"Автошкола ДОСААФ","ll":[54.61834,39.767546]},{"name":"Автобусный парк","ll":[54.619226,39.773345]},{"name":"Ул. Гражданская","ll":[54.620413,39.781033]},{"name":"Кальное","ll":[54.620984,39.786421]},{"name":"Касимовское шоссе","ll":[54.619167,39.793588]},{"name":"Ул. Советской Армии","ll":[54.615492,39.793746]},{"name":"Ул. Новосёлов","ll":[54.612025,39.792448]},{"name":"Кинотеатр «Октябрь»","ll":[54.61103,39.797278]},{"name":"Горбольница №11","ll":[54.609903,39.802962]},{"name":"Стоматологическая поликлиника","ll":[54.608494,39.810193]},{"name":"Шереметьево","ll":[54.607113,39.814702]},{"name":"Сбербанк","ll":[54.603717,39.81909]},{"name":"Новосёлов, 54","ll":[54.600448,39.826244]},{"name":"Новосёлов, 60","ll":[54.597976,39.82752]}],"lengthM":13761},{"id":"47","rid":175,"path":[[54.598004,39.827549],[54.597845,39.82798],[54.599132,39.829684],[54.599266,39.829724],[54.599383,39.829636],[54.59946,39.829411],[54.599422,39.829109],[54.600245,39.827128],[54.604168,39.81849],[54.604962,39.817519],[54.607044,39.815501],[54.607272,39.8151],[54.607982,39.813414],[54.608282,39.812482],[54.608504,39.811449],[54.612343,39.791826],[54.617124,39.794933],[54.617347,39.795113],[54.617814,39.795727],[54.618772,39.796373],[54.619715,39.791158],[54.619941,39.790213],[54.620925,39.786863],[54.623732,39.779236],[54.624417,39.777184],[54.625915,39.771677],[54.625863,39.77089],[54.625903,39.770437],[54.626544,39.768835],[54.626892,39.768137],[54.62781,39.766633],[54.62197,39.756076],[54.622106,39.755975],[54.622568,39.755214],[54.631568,39.7402],[54.629355,39.736009],[54.629278,39.735821],[54.629236,39.735344],[54.629216,39.733427],[54.629325,39.7252],[54.6294,39.724319],[54.629413,39.722613],[54.629255,39.721503],[54.629031,39.712148],[54.629053,39.711126],[54.629316,39.709822],[54.632973,39.697985],[54.633668,39.695958],[54.639084,39.678556],[54.638923,39.678511],[54.635733,39.67599],[54.633845,39.674402],[54.633462,39.673924],[54.632966,39.672859],[54.63368,39.671305],[54.636593,39.662999],[54.636947,39.661826],[54.638239,39.65468],[54.640219,39.641162],[54.643753,39.64457],[54.646152,39.646523],[54.646996,39.646841],[54.648392,39.646972],[54.649277,39.64781],[54.651746,39.640573],[54.651997,39.639646],[54.652111,39.638862],[54.65211,39.636335],[54.652211,39.635448],[54.652377,39.635049],[54.652608,39.634848],[54.652947,39.63493],[54.65313,39.635244],[54.653175,39.635623],[54.653125,39.636004],[54.652884,39.636736],[54.652362,39.637764],[54.651124,39.639549],[54.650084,39.640557],[54.649305,39.641067],[54.648612,39.641357],[54.647588,39.641561],[54.647433,39.641381],[54.647346,39.641093],[54.647358,39.64034],[54.64743,39.640231],[54.649079,39.640016],[54.649378,39.638499],[54.648547,39.638502],[54.648528,39.640074],[54.64743,39.640231],[54.647358,39.64034],[54.647346,39.641093],[54.647033,39.641577],[54.646788,39.641601],[54.645858,39.641365],[54.645607,39.641046],[54.645473,39.640461],[54.644401,39.632291],[54.646831,39.621666],[54.653658,39.626416],[54.653831,39.626461],[54.65396,39.626194],[54.655267,39.620304],[54.655538,39.618863],[54.655723,39.616771],[54.655963,39.61533],[54.656714,39.611894]],"stops":[],"lengthM":22961},{"id":"50","rid":414,"path":[[54.593405,39.701018],[54.593317,39.701787],[54.59339,39.701981],[54.596359,39.703143],[54.595237,39.711675],[54.595406,39.711741],[54.605639,39.712461],[54.605845,39.705307],[54.607254,39.70287],[54.610538,39.708743],[54.609893,39.710099],[54.609776,39.710599],[54.609552,39.712716],[54.609511,39.71481],[54.609567,39.715105],[54.615062,39.725444],[54.617224,39.72938],[54.62493,39.716895],[54.62541,39.716569],[54.629076,39.716224],[54.629117,39.716084],[54.629024,39.711599],[54.629104,39.710737],[54.629235,39.710099],[54.632973,39.697985],[54.633668,39.695958],[54.637473,39.683789],[54.64263,39.66701],[54.644856,39.660417],[54.64854,39.663339],[54.649087,39.663525],[54.651036,39.665026],[54.652198,39.666528],[54.654178,39.665173],[54.657108,39.663345],[54.657434,39.663212],[54.658287,39.66315],[54.659993,39.663529],[54.660248,39.663754],[54.660253,39.667995],[54.663118,39.667814],[54.666794,39.662987],[54.668471,39.660977],[54.672732,39.655404],[54.673019,39.655329],[54.673489,39.656005],[54.673706,39.656004],[54.673895,39.655838],[54.681386,39.645982],[54.687262,39.637673]],"stops":[{"name":"Ул. Вокзальная","ll":[54.630058,39.707773]},{"name":"ТД \"Барс\"","ll":[54.632435,39.700051]},{"name":"ТРЦ \"Премьер\"","ll":[54.635764,39.689684]},{"name":"Автовокзал","ll":[54.639565,39.677303]},{"name":"Университет МВД России","ll":[54.642384,39.668123]},{"name":"Таможня","ll":[54.643956,39.663466]},{"name":"Спорткомплекс \"Чайка\"","ll":[54.650118,39.664431]},{"name":"Депо №2","ll":[54.65577,39.664332]},{"name":"Интернациональная, 23","ll":[54.661422,39.668144]},{"name":"Муниципальный рынок","ll":[54.665026,39.665507]},{"name":"3-й квартал","ll":[54.667848,39.661923]},{"name":"Аптека \"Алфавит\"","ll":[54.671271,39.657463]},{"name":"Школа","ll":[54.674612,39.655052]},{"name":"Больничный комплекс","ll":[54.677399,39.651393]},{"name":"Детская поликлиника","ll":[54.681439,39.645978]},{"name":"ул. Княжье поле, 4","ll":[54.683538,39.643124]},{"name":"ул.Княжье Поле","ll":[54.68672,39.63865]}],"lengthM":16549}]};</script>
 <script src="config.js"></script>
@@ -2170,19 +2425,26 @@ function initYandex(){
   map.on('zoomanim', e => ymap.update({location:{center:[e.center.lng, e.center.lat], zoom:e.zoom, duration:250}}));
 }
 /* Легенда стоит над кнопкой «Открыть Яндекс Карты» и выровнена с ней по левому краю */
+/* Плашка показателей не должна перекрывать элементы Яндекса внизу карты (кнопку «Открыть Яндекс Карты», копирайт, логотип):
+   ищем их и, если они пересекаются с плашкой по горизонтали, поднимаем её на 8 px выше самого высокого из них */
 function placeLegend(){
-  return true; /* в упрощённой версии легенда — выпадашка у кнопки «Статус ТС» */
-  const lg = $('#legend'), stage = $('#stage');
-  if(baseMode==='schema'){ lg.style.left=''; lg.style.bottom=''; return true; }
+  const dock = $('.kpi-dock'), stage = $('#stage'); if(!dock) return true;
+  if(baseMode==='schema'){ dock.style.setProperty('--dock-lift','0px'); return true; }
   const sr = stage.getBoundingClientRect();
-  // кнопка Яндекса: любой элемент с текстом «Открыть … Яндекс Карт…» в нижней половине карты; берём саму «пилюлю» (самый крупный элемент высотой до 48 px)
-  const hits = [...$('#ymap').querySelectorAll('*')].filter(el=>{ const t=(el.textContent||'').trim(); if(!/Яндекс\s*Карт/i.test(t) || t.length>60) return false; const r=el.getBoundingClientRect(); return r.width>0 && r.height>0 && r.height<=48 && r.top>sr.top+sr.height/2; });
-  if(!hits.length) return false;
-  const pillEl = hits.reduce((a,b)=>{ const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(); return rb.width*rb.height>ra.width*ra.height ? b : a; });
-  const r = pillEl.getBoundingClientRect();
-  if(r.left > sr.left + sr.width/2) return false;
-  lg.style.left = Math.round(r.left - sr.left) + 'px';
-  lg.style.bottom = Math.round(sr.bottom - r.top + 8) + 'px';
+  const base = parseFloat(getComputedStyle(dock).getPropertyValue('--dock-base')) || 16;
+  dock.style.setProperty('--dock-lift','0px');
+  const dr = dock.getBoundingClientRect();
+  const isYa = el => { const t=((el.textContent||'')+' '+(el.getAttribute('aria-label')||'')+' '+(el.getAttribute('title')||'')).trim(); const c=String(el.className&&el.className.baseVal!==undefined?el.className.baseVal:el.className||''); return /Яндекс|Yandex/i.test(t)&&t.length<80 || /copyright|logo|open-block/i.test(c); };
+  let top = Infinity;
+  for(const el of $('#ymap').querySelectorAll('*')){
+    if(!isYa(el)) continue;
+    const r = el.getBoundingClientRect();
+    if(!r.width || !r.height || r.height>60 || r.top < sr.bottom-160) continue;
+    if(r.right < dr.left || r.left > dr.right) continue;
+    top = Math.min(top, r.top);
+  }
+  const lift = top===Infinity ? 0 : Math.max(0, Math.round(sr.bottom - top + 8 - base));
+  dock.style.setProperty('--dock-lift', lift+'px');
   return true;
 }
 let legendObs = null;
@@ -2371,7 +2633,8 @@ function setState(s){
   $('#map').classList.toggle('map-dim', s==='incident' || s==='deciding');
   styleRoutes(); updateBusMarkers(true); renderKpis(); renderLegend(); renderScenario(); renderAlert(); renderFeed(); renderRoutes();
   const crit = s==='incident' || s==='deciding';
-  $('#railDot').hidden = !(crit || s==='assigned');
+  $('#railDot').hidden = !(crit || s==='assigned'); const td=$('#tabDot'); if(td) td.hidden = $('#railDot').hidden;
+  if(crit && typeof setSheet==='function' && isMobile() && s==='incident') setSheet('half');
   document.title = crit ? '● Авария М10 · SmartTransport' : s==='assigned' ? '◐ Замена в пути · SmartTransport' : 'SmartTransport';
 }
 
@@ -2793,7 +3056,7 @@ function renderDone(){
   const ack = !!inc.ack;
   $('#drawer').innerHTML = `
   <div class="dz-head">
-    <div class="dz-meta"><span class="chip brand">${ic('nav')}В работе</span><span>Инцидент <span class="num">№ ${inc.id}</span></span></div>
+    <div class="dz-meta"><span class="chip brand">${ic('nav')}В работе</span><span>Инцидент № <span class="num">${inc.id}</span></span></div>
     <h2>Замена назначена</h2>
     <button class="dz-close" data-act="close" aria-label="Закрыть (Esc)">${ic('x')}</button>
   </div>
@@ -2923,7 +3186,7 @@ $('#zFit').addEventListener('click', ()=>fitCity(true));
 $('#bmSchema').addEventListener('click', ()=>setBasemap('schema'));
 $('#bmMin').addEventListener('click', ()=>setBasemap('min'));
 $$('[data-stub]').forEach(b=>b.addEventListener('click', ()=>toast('Раздел вне рамок прототипа: показаны экраны «Карта» и «Замена»')));
-$('#railInc').addEventListener('click', ()=>{ if(state==='incident'||state==='deciding') openDecision(); else if(state==='assigned') openDrawer(); else toast('Активных инцидентов нет'); });
+/* «Инциденты» — теперь раздел (см. блок «Разделы») */
 
 /* ================= UX page ================= */
 function renderUX(){
@@ -2991,6 +3254,7 @@ function renderUX(){
       <div class="card"><h5>Ночная смена</h5><ul><li>Тёмная тема без чистого чёрного и белого: графит с лёгким фиолетовым оттенком.</li><li>Подложка карты приглушена, данные контрастнее фона.</li><li>Анимация только у критичных объектов, звук можно выключить одной кнопкой.</li></ul></div>
       <div class="card"><h5>Мгновенное чтение данных</h5><ul><li>Номера, время и отклонения набраны моноширинным шрифтом с цифрами одной ширины: при обновлении цифры не прыгают.</li><li>Отклонения со знаком: <span class="num">+7:10</span>, <span class="num">−1:04</span>.</li><li>Номер маршрута прямо на маркере, номер борта — по нажатию.</li></ul></div>
       <div class="card"><h5>Сначала главное</h5><ul><li>Карточки краткие: номер борта, время доезда, доступность и только те бейджи, где что-то не в норме.</li><li>Раскрывается то, с чем диспетчер работает: выбранный резерв, выбранный маршрут, событие по клику, «Подробнее» у сломанного борта и в окне автобуса.</li><li>Легенда статусов свёрнута в кнопку над картой, у карты два вида: «Схема» и «Карта» (только дороги).</li></ul></div>
+      <div class="card"><h5>Телефон</h5><ul><li>Разделы — в таб-баре внизу, до него дотягивается большой палец; тема, звук и помощь спрятаны в профиль — ими пользуются редко.</li><li>События — шторка над картой: свёрнута до строки, авария раскрывает её сама, «Показать» сворачивает, чтобы была видна карта.</li><li>Окно замены открывается во весь экран, «Назначить» закреплена внизу.</li></ul></div>
       <div class="card"><h5>Защита от ошибок</h5><ul><li>Недоступные кандидаты нельзя выбрать, причина указана.</li><li>После назначения 10 секунд на отмену, без модальных «Вы уверены?».</li><li>Каждое действие попадает в ленту смены с временем.</li></ul></div>
     </div>
     <div class="grid2" style="margin-top:16px">
@@ -3021,6 +3285,353 @@ setState('idle');
 startCountdown();
 uiTick();
 requestAnimationFrame(loop);
+/* =====================================================================
+   Разделы: «Маршруты и расписания», «Подвижной состав», «Инциденты», «Аналитика».
+   Раздел открывается поверх карты и правой колонки: слева список с поиском и фильтрами,
+   справа карточка выбранного элемента. Карта под разделом не выгружается.
+   Данные — те же, что на карте (маршруты bus62, борта, резерв, события);
+   то, чего в прототипе нет (расписание, пробег, история смены), смоделировано детерминированно.
+   ===================================================================== */
+const VIEWS = {
+  routes:{title:'Маршруты и расписания'},
+  fleet:{title:'Подвижной состав'},
+  incidents:{title:'Инциденты'},
+  analytics:{title:'Аналитика смены'}
+};
+let view = 'map';
+const VS = {routes:{q:'',f:'all',sel:null}, fleet:{q:'',f:'all',sel:null}, incidents:{q:'',f:'all',sel:null}, analytics:{}};
+const SR = rng(2026);
+const seeded = {};                       // стабильные «смоделированные» значения по ключу
+const sv = (key, fn) => (seeded[key] ??= fn(SR));
+const tm = (h,m) => `${pad(h)}:${pad(m)}`;
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const STATUS_CHIP = {ok:['ok','По графику'], warn:['warn','Опоздание до 5 мин'], late:['late','Опоздание > 5 мин'], crit:['crit','Авария'], off:['mute','Снят с линии'], moving:['brand','Едет на замену']};
+
+function setView(v){
+  if(!VIEWS[v] && v!=='map') return;
+  view = v;
+  $$('[data-view]').forEach(b=>{ const on = b.dataset.view===v; b.classList.toggle('is-active', on); if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  const el = $('#view');
+  el.hidden = v==='map';
+  document.body.dataset.view = v;
+  if(v!=='map'){ if($('#drawer').classList.contains('is-open')) closeDrawer(); renderView(); el.querySelector('.v-body').scrollTop = 0; }
+  else setTimeout(()=>map.invalidateSize(), 50);
+}
+$$('[data-view]').forEach(b=>b.addEventListener('click', ()=>setView(b.dataset.view)));
+
+/* ---------- общий каркас ---------- */
+function renderView(){
+  if(view==='map') return;
+  const v = VIEWS[view];
+  $('#vTitle').textContent = v.title;
+  $('#view').classList.toggle('is-wide', view==='analytics');
+  ({routes:renderRoutesView, fleet:renderFleetView, incidents:renderIncView, analytics:renderAnalytics})[view]();
+}
+function toolsHTML(st, filters, placeholder){
+  return `<label class="search v-search"><span>${ic('search')}</span><input data-vq placeholder="${placeholder}" value="${esc(st.q)}" autocomplete="off"></label>
+    <div class="seg" role="group">${filters.map(([k,l,n])=>`<button data-vf="${k}" aria-pressed="${st.f===k}">${l}${n!=null?` <span class="num">${n}</span>`:''}</button>`).join('')}</div>`;
+}
+function bindTools(st){
+  const q = $('#vTools [data-vq]');
+  if(q) q.addEventListener('input', ()=>{ st.q = q.value; const pos=q.selectionStart; renderView(); const nq=$('#vTools [data-vq]'); nq.focus(); nq.setSelectionRange(pos,pos); });
+  $$('#vTools [data-vf]').forEach(b=>b.addEventListener('click', ()=>{ st.f = b.dataset.vf; renderView(); }));
+}
+function openDetail(id){ VS[view].sel = id; $('#view').classList.add('has-detail'); renderView(); $('#vDetail').scrollTop = 0; }
+$('#view').addEventListener('click', e=>{
+  if(e.target.closest('[data-vback]')){ VS[view].sel = null; $('#view').classList.remove('has-detail'); renderView(); return; }
+  const row = e.target.closest('[data-vid]'); if(row){ openDetail(row.dataset.vid); return; }
+  const a = e.target.closest('[data-vact]'); if(a) vAction(a.dataset.vact, a.dataset.arg);
+});
+function vAction(act, arg){
+  if(act==='route-map'){ setView('map'); if(selRoute!==arg) selectRoute(arg); }
+  if(act==='bus-map'){ setView('map'); const b = buses[arg]; if(b){ map.flyTo(busMarkers[b.id].getLatLng(), 15, {duration:.6}); setTimeout(()=>openBusPopup(b), 650); } else { const r = reserves.find(x=>x.id===arg); if(r && resMarkers[r.id]) map.flyTo(resMarkers[r.id].getLatLng(), 15, {duration:.6}); } }
+  if(act==='inc-show'){ setView('map'); if(incident) focusIncident(); }
+  if(act==='inc-solve'){ setView('map'); openDecision(); }
+  if(act==='inc-progress'){ setView('map'); openDrawer(); }
+}
+const kv = (rows) => `<dl class="v-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+const empty = (t) => `<div class="v-empty">${t}</div>`;
+
+/* ---------- Маршруты и расписания ---------- */
+function routeStats(r){
+  const bs = Object.values(buses).filter(b=>b.route===r.id && b.state!=='off');
+  const sts = bs.map(b=> b.state==='moving' ? 'ok' : busStatus(b));
+  const worst = sts.includes('crit') ? 'crit' : sts.includes('late') ? 'late' : sts.includes('warn') ? 'warn' : 'ok';
+  const plan = DEFS().find(d=>d.id===r.id).buses.length;
+  const active = bs.filter(b=>b.state==='line').length;
+  const ivPlan = Math.round(r.cycleMin/plan), ivFact = Math.round(r.cycleMin/Math.max(1,active));
+  const reg = Math.round(sts.filter(x=>x==='ok').length/Math.max(1,sts.length)*100);
+  const first = sv('f'+r.id, R=>tm(5, 20+Math.floor(R()*35))), last = sv('l'+r.id, R=>tm(22, 30+Math.floor(R()*29)));
+  return {bs, worst, plan, active, ivPlan, ivFact, reg, first, last};
+}
+const WORST_CHIP = {crit:['crit','Авария'], late:['late','Сбой'], warn:['warn','Отклонение'], ok:['ok','Норма']};
+function renderRoutesView(){
+  const st = VS.routes;
+  const all = Object.values(routes).map(r=>({r, s:routeStats(r)}));
+  const bad = all.filter(x=>x.s.worst!=='ok').length;
+  $('#vSub').textContent = `${all.length} ${plural(all.length,'маршрут','маршрута','маршрутов')} · ${all.reduce((a,x)=>a+x.s.active,0)} ТС на линии`;
+  $('#vTools').innerHTML = toolsHTML(st, [['all','Все',all.length],['bad','С отклонениями',bad]], 'Номер или название маршрута');
+  bindTools(st);
+  const q = st.q.trim().toLowerCase();
+  const ord = {crit:0, late:1, warn:2, ok:3};
+  const list = all.filter(x=> (st.f==='all' || x.s.worst!=='ok') && (!q || x.r.id.includes(q) || x.r.name.toLowerCase().includes(q)))
+    .sort((a,b)=>ord[a.s.worst]-ord[b.s.worst] || (+a.r.id)-(+b.r.id));
+  $('#vBody').innerHTML = list.length ? `<ul class="v-list">${list.map(({r,s})=>{ const [cc,ct]=WORST_CHIP[s.worst];
+    return `<li class="v-row${st.sel===r.id?' is-sel':''}" data-vid="${r.id}" tabindex="0">
+      <span class="rb${s.worst==='crit'?' is-crit':''}">${r.id}</span>
+      <div class="v-row-main"><b>${esc(r.name)}</b><span>${s.active} из ${s.plan} ТС · интервал ${s.ivFact} мин · ${s.first}–${s.last}</span></div>
+      <span class="chip ${cc}">${ct}</span>
+      <span class="v-row-num num">${s.reg}<small> %</small></span>
+    </li>`; }).join('')}</ul>` : empty('Ничего не найдено');
+  const sel = st.sel && routes[st.sel];
+  $('#vDetail').innerHTML = sel ? routeDetail(sel) : `<div class="v-ph">${ic('route')}<p>Выберите маршрут, чтобы увидеть расписание, интервалы и автобусы на линии</p></div>`;
+}
+function routeDetail(r){
+  const s = routeStats(r); const [cc,ct] = WORST_CHIP[s.worst];
+  const km = (r.path.len/1000).toFixed(1).replace('.',',');
+  const buses_ = s.bs.slice().sort((a,b)=>Math.abs(b.dev)-Math.abs(a.dev));
+  return `<div class="v-card">
+    <div class="v-dhead"><span class="rb lg${s.worst==='crit'?' is-crit':''}">${r.id}</span><div><h3>${esc(r.name)}</h3><span class="chip ${cc}">${ct}</span></div></div>
+    ${kv([['ТС на линии', `<span class="num">${s.active}</span> из <span class="num">${s.plan}</span>`],['Интервал', `<span class="num">${s.ivFact}</span> мин <small>план ${s.ivPlan}</small>`],['Регулярность', `<span class="num">${s.reg} %</span>`],['Длина / оборот', `<span class="num">${km}</span> км · <span class="num">${Math.round(r.cycleMin)}</span> мин`],['Первый рейс', `<span class="num">${s.first}</span>`],['Последний рейс', `<span class="num">${s.last}</span>`]])}
+    <h4>Конечные</h4>
+    <div class="v-term"><span><i></i>${esc(r.stops[0].name)}</span><span><i></i>${esc(r.stops[r.stops.length-1].name)}</span><small>${r.stops.length} ${plural(r.stops.length,'остановка','остановки','остановок')}</small></div>
+    <h4>Автобусы на маршруте</h4>
+    <ul class="v-mini">${buses_.map(b=>{ const k = b.state==='moving'?'moving':busStatus(b); const [c,t]=STATUS_CHIP[k]; return `<li><b class="num">${b.id}</b><span>→ ${esc(nextStop(b).stop.name)}</span><span class="chip ${c}">${k==='ok'||k==='warn'||k==='late' ? devText(b.dev) : t}</span></li>`; }).join('')}</ul>
+    <button class="btn btn-primary v-cta" data-vact="route-map" data-arg="${r.id}">${ic('map')}Показать на карте</button>
+  </div>`;
+}
+
+/* ---------- Подвижной состав ---------- */
+const RES_KIND = {free:['ok','Резерв · свободен'], busy:['warn','Резерв · занят'], depot:['mute','В депо'], break:['mute','Перерыв водителя']};
+function fleetItems(){
+  const line = Object.values(buses).map(b=>{
+    const k = b.state==='moving'?'moving':busStatus(b);
+    const [c,t] = STATUS_CHIP[k];
+    const where = b.state==='broken' ? `М${b.route} · сход у ост. «${incident?incident.stop.name:'—'}»` : b.state==='off' ? 'Снят с линии' : `М${b.route} → ${nextStop(b).stop.name}`;
+    return {id:b.id, b, group: k==='crit'||k==='off' ? 'bad' : 'line', chip:[c, k==='ok'||k==='warn'||k==='late' ? `${t} · ${devText(b.dev)}` : t], model:b.model, plate:b.plate, where, driver:b.driver};
+  });
+  const res = reserves.map(r=>({id:r.id, r, group:'res', chip:RES_KIND[r.kind], model:r.model, plate:r.plate, where:r.place, driver:r.driver}));
+  return [...line, ...res];
+}
+function renderFleetView(){
+  const st = VS.fleet; const all = fleetItems();
+  const n = g => all.filter(x=>x.group===g).length;
+  $('#vSub').textContent = `${all.length} ${plural(all.length,'автобус','автобуса','автобусов')} · ${n('line')} на линии · ${n('res')} в резерве`;
+  $('#vTools').innerHTML = toolsHTML(st, [['all','Все',all.length],['line','На линии',n('line')],['res','Резерв',n('res')],['bad','Неисправны',n('bad')]], 'Борт, госномер, водитель или маршрут');
+  bindTools(st);
+  const q = st.q.trim().toLowerCase();
+  const ord = {bad:0, res:2, line:1};
+  const list = all.filter(x=>(st.f==='all'||x.group===st.f) && (!q || [x.id,x.plate,x.driver,x.where,x.model].join(' ').toLowerCase().includes(q)))
+    .sort((a,b)=>ord[a.group]-ord[b.group] || a.id.localeCompare(b.id));
+  $('#vBody').innerHTML = list.length ? `<ul class="v-list">${list.map(x=>`<li class="v-row${st.sel===x.id?' is-sel':''}" data-vid="${x.id}" tabindex="0">
+      <span class="v-id num">${x.id}</span>
+      <div class="v-row-main"><b>${esc(x.where)}</b><span>${esc(x.model)} · ${esc(x.plate)} · ${esc(x.driver)}</span></div>
+      <span class="chip ${x.chip[0]}">${x.chip[1]}</span>
+    </li>`).join('')}</ul>` : empty('Ничего не найдено');
+  const sel = st.sel && all.find(x=>x.id===st.sel);
+  $('#vDetail').innerHTML = sel ? fleetDetail(sel) : `<div class="v-ph">${ic('bus')}<p>Выберите автобус, чтобы увидеть водителя, загрузку, топливо и техобслуживание</p></div>`;
+}
+function fleetDetail(x){
+  const id = x.id;
+  const fuel = x.r ? x.r.fuel : sv('fu'+id, R=>30+Math.floor(R()*65));
+  const run = sv('km'+id, R=>80+Math.floor(R()*130));
+  const to = sv('to'+id, R=>300+Math.floor(R()*4500));
+  const shift = x.r ? x.r.shiftEnd : sv('sh'+id, R=>['23:30','00:15','01:00','06:00'][Math.floor(R()*4)]);
+  const rows = [['Модель', esc(x.model)],['Госномер', `<span class="num">${esc(x.plate)}</span>`],['Вместимость', `<span class="num">${x.b?x.b.cap:x.r.cap}</span> мест`]];
+  if(x.b && x.b.state!=='broken') rows.push(['В салоне', `<span class="num">≈ ${x.b.pax}</span> из <span class="num">${x.b.cap}</span>`]);
+  rows.push(['Топливо', `<span class="num">${fuel} %</span>`],['Пробег за смену', `<span class="num">${run}</span> км`],['До ТО', `<span class="num">${to.toLocaleString('ru-RU')}</span> км`]);
+  return `<div class="v-card">
+    <div class="v-dhead"><span class="v-id lg num">${id}</span><div><h3>${esc(x.where)}</h3><span class="chip ${x.chip[0]}">${x.chip[1]}</span></div></div>
+    <div class="v-driver">${ava(x.driver)}<div><b>${esc(x.driver)}</b><span>водитель · смена до <span class="num">${shift}</span></span></div></div>
+    ${kv(rows)}
+    <div class="v-meter"><span>Топливо</span><i><b style="width:${fuel}%" class="${fuel<30?'is-low':''}"></b></i></div>
+    <button class="btn btn-primary v-cta" data-vact="bus-map" data-arg="${id}">${ic('target')}Показать на карте</button>
+  </div>`;
+}
+
+/* ---------- Инциденты ---------- */
+function incList(){
+  const base = [
+    {id:'2416', t:minsAgo(58), type:'Поломка', title:'М11 · Борт 1105: не закрываются двери', status:'done', react:'0:41', repl:9, by:'Резерв 2207 · через 9 мин',
+      log:[[58,'Сигнал водителя: неисправность дверей'],[57,'Диспетчер принял инцидент'],[56,'Назначен резерв 2207'],[49,'2207 вышел на линию'],[46,'1105 ушёл в депо']]},
+    {id:'2414', t:minsAgo(96), type:'ДТП', title:'М7 · ДТП без пострадавших у ост. «Площадь Победы»', status:'done', react:'1:12', repl:14, by:'ГИБДД оформили · задержка 12 мин',
+      log:[[96,'Сигнал водителя: ДТП, пострадавших нет'],[95,'Вызвана ГИБДД'],[94,'Пассажиры пересажены на следующий рейс'],[82,'Движение восстановлено']]},
+    {id:'2412', t:minsAgo(143), type:'Оборудование', title:'М32 · Борт 3202: отказ валидатора', status:'done', react:'2:05', repl:0, by:'Перезагрузка терминала удалённо',
+      log:[[143,'Телеметрия: валидатор не отвечает'],[141,'Удалённая перезагрузка'],[138,'Оплата работает']]},
+    {id:'2418', t:minsAgo(3), type:'Затор', title:`${bref(ROLE.late)}: затор, опоздание 7 мин`, status:'watch', react:'—', repl:0, by:'Наблюдение · интервал выровняется сам',
+      log:[[3,`Телеметрия: отставание +7:12 у ост. «${stopNear(ROLE.late)}»`],[2,'Уведомлены пассажиры на остановках']]}
+  ];
+  if(incident){
+    const st = state==='resolved' ? 'done' : state==='assigned' ? 'work' : 'open';
+    const ago = (Date.now()-incident.t0)/60000;
+    const log = [[ago,'Кнопка водителя + телеметрия: перегрев двигателя, t° ОЖ 118 °C']];
+    if(lastReaction!=null) log.push([ago - lastReaction/60, `Назначен резерв ${selCand?selCand.id:''}`]);
+    if(state==='resolved') log.push([0.1,'Замена на линии, интервал выровнен']);
+    base.unshift({id:String(incident.id), t:new Date(incident.t0), type:'Поломка', title:'М10 · Борт 1047: поломка, движение невозможно', status:st, react: lastReaction!=null ? mmss(lastReaction).replace(/^0/,'') : '—', repl: st==='done' ? Math.max(1,Math.round(ago)) : 0,
+      by: st==='open' ? 'Требуется решение: замена борта' : st==='work' ? `Резерв ${selCand?selCand.id:''} едет на замену` : `Заменён бортом ${selCand?selCand.id:''}`, log, live:true});
+  }
+  return base;
+}
+const INC_ST = {open:['crit','Открыт'], work:['brand','В работе'], watch:['warn','Наблюдение'], done:['ok','Решён']};
+function renderIncView(){
+  const st = VS.incidents; const all = incList();
+  const open = all.filter(x=>x.status!=='done').length;
+  $('#vSub').textContent = `За смену ${all.length} · открыто ${open}`;
+  $('#vTools').innerHTML = toolsHTML(st, [['all','Все',all.length],['open','Открытые',open],['done','Решённые',all.length-open]], 'Маршрут, борт или тип');
+  bindTools(st);
+  const q = st.q.trim().toLowerCase();
+  const list = all.filter(x=>(st.f==='all' || (st.f==='open' ? x.status!=='done' : x.status==='done')) && (!q || (x.title+' '+x.type).toLowerCase().includes(q)));
+  $('#vBody').innerHTML = list.length ? `<ul class="v-list">${list.map(x=>{ const [c,t]=INC_ST[x.status]; return `<li class="v-row${st.sel===x.id?' is-sel':''}${x.status==='open'?' is-crit':''}" data-vid="${x.id}" tabindex="0">
+      <span class="sdot ${c==='brand'?'brand':c}"></span>
+      <div class="v-row-main"><b>${esc(x.title)}</b><span>${x.type} · № ${x.id} · ${esc(x.by)}</span></div>
+      <span class="chip ${c}">${t}</span>
+      <span class="v-row-num num">${hhmm(x.t)}</span>
+    </li>`; }).join('')}</ul>` : empty('Ничего не найдено');
+  const sel = st.sel && all.find(x=>x.id===st.sel);
+  $('#vDetail').innerHTML = sel ? incDetail(sel) : `<div class="v-ph">${ic('alert')}<p>Выберите инцидент, чтобы увидеть хронологию и принятые меры</p></div>`;
+}
+function incDetail(x){
+  const [c,t] = INC_ST[x.status];
+  const acts = x.live ? (x.status==='open' ? `<div class="v-acts"><button class="btn btn-ghost" data-vact="inc-show">${ic('target')}Показать</button><button class="btn btn-danger" data-vact="inc-solve">Решить</button></div>`
+    : x.status==='work' ? `<button class="btn btn-primary v-cta" data-vact="inc-progress">${ic('map')}Следить за заменой</button>` : '') : '';
+  return `<div class="v-card">
+    <div class="v-dhead"><span class="v-ic ${c}">${ic('alert')}</span><div><h3>${esc(x.title)}</h3><span class="chip ${c}">${t}</span></div></div>
+    ${kv([['Тип', x.type],['Номер', `№ <span class="num">${x.id}</span>`],['Время реакции', `<span class="num">${x.react}</span>`],['Решение', esc(x.by)]])}
+    <h4>Хронология</h4>
+    <ol class="v-log">${x.log.map(([m,txt])=>`<li><span class="num">${hhmm(minsAgo(m))}</span><p>${esc(txt)}</p></li>`).join('')}</ol>
+    ${acts}
+  </div>`;
+}
+
+/* ---------- Аналитика ---------- */
+function chartW(el){ return Math.max(260, Math.round(el.getBoundingClientRect().width) - 40); }
+function regSeries(){
+  // регулярность по получасам за последние 12 часов; последний пункт — текущее значение на карте
+  const n = 24, now = new Date(); const end = new Date(now); end.setMinutes(now.getMinutes() < 30 ? 0 : 30, 0, 0);
+  const R = rng(17); let v = 93.5;
+  const c = counts(); const onLine = c.total - c.crit - c.moving; const cur = Math.round(c.ok/Math.max(1,onLine)*1000)/10;
+  const out = Array.from({length:n}, (_,i)=>{ v = clamp(v + (R()-.5)*3 + (93.5-v)*0.18, 86, 98); const d = new Date(end.getTime() - (n-1-i)*1800000); return {t:hhmm(d), v:Math.round(v*10)/10}; });
+  out[out.length-1].v = cur; return out;
+}
+function lineChart(data, W){
+  const H = 220, l = 36, r = 12, t = 14, b = 28, lo = 80, hi = 100, target = 92;
+  const X = i => l + (W-l-r)*i/Math.max(1,data.length-1), Y = v => t + (H-t-b)*(1-(v-lo)/(hi-lo));
+  const pts = data.map((d,i)=>[X(i),Y(d.v)]);
+  const path = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  let g = '';
+  for(let v=lo; v<=hi; v+=5) g += `<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" class="c-grid"/><text x="${l-8}" y="${Y(v)+4}" text-anchor="end" class="c-ax">${v}</text>`;
+  data.forEach((d,i)=>{ if(i%4===0) g += `<text x="${X(i)}" y="${H-8}" text-anchor="middle" class="c-ax">${d.t}</text>`; });
+  g += `<line x1="${l}" x2="${W-r}" y1="${Y(target)}" y2="${Y(target)}" class="c-target"/><text x="${W-r}" y="${Y(target)-6}" text-anchor="end" class="c-ax c-target-l">норматив ${target} %</text>`;
+  const last = pts[pts.length-1];
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Регулярность по получасам за смену">
+    ${g}<path d="${path} L${last[0]} ${Y(lo)} L${pts[0][0]} ${Y(lo)}Z" class="c-area"/><path d="${path}" class="c-line"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="4" class="c-dot"/>
+    <line class="c-cross" x1="0" x2="0" y1="${t}" y2="${H-b}" visibility="hidden"/><circle class="c-hov" r="5" visibility="hidden"/>
+    <rect class="c-hit" x="${l}" y="${t}" width="${W-l-r}" height="${H-t-b}" fill="transparent" data-line='${JSON.stringify(data.map((d,i)=>[d.t,d.v,X(i),Y(d.v)]))}'/>
+  </svg>`;
+}
+function delaysData(){
+  return Object.values(routes).map(r=>{
+    const s = routeStats(r);
+    const nowLate = s.bs.filter(b=>b.state==='line' && busStatus(b)!=='ok').length;
+    const n = sv('dl'+r.id, R=>Math.floor(R()*6)) + nowLate*3 + (s.worst==='crit'?4:0);
+    const avg = sv('da'+r.id, R=>2+Math.round(R()*40)/10);
+    return {id:r.id, name:r.name, n, avg};
+  }).sort((a,b)=>b.n-a.n);
+}
+function barsHTML(rows, max, fmt, ttf){
+  return `<ul class="c-bars">${rows.map(x=>`<li data-tt="${esc(ttf(x))}"><span class="rb">${x.id}</span><i><b style="width:${Math.max(2, x.n/max*100)}%"></b></i><span class="num">${fmt(x)}</span></li>`).join('')}</ul>`;
+}
+function renderAnalytics(){
+  $('#vSub').textContent = `Последние 12 часов · обновлено ${hhmm(new Date())}`;
+  $('#vTools').innerHTML = `<div class="seg" role="group"><button aria-pressed="true">Текущая смена</button><button disabled title="В прототипе — только текущая смена">Вчера</button><button disabled title="В прототипе — только текущая смена">Неделя</button></div>`;
+  const reg = regSeries(); const regNow = reg[reg.length-1].v; const regAvg = Math.round(reg.reduce((a,d)=>a+d.v,0)/reg.length*10)/10;
+  const dl = delaysData(); const dmax = Math.max(...dl.map(x=>x.n), 1);
+  const inc = incList(); const reacts = inc.map(x=>x.react).filter(x=>x!=='—').map(s=>{ const [m,sec]=s.split(':').map(Number); return m*60+sec; });
+  const avgReact = reacts.length ? Math.round(reacts.reduce((a,b)=>a+b,0)/reacts.length) : 0;
+  const repl = inc.map(x=>x.repl).filter(Boolean); const avgRepl = repl.length ? Math.round(repl.reduce((a,b)=>a+b,0)/repl.length) : 0;
+  const types = {}; inc.forEach(x=>types[x.type]=(types[x.type]||0)+1);
+  const tRows = Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([k,n])=>({id:k, n}));
+  const out = Object.values(routes).map(r=>{ const s=routeStats(r); return {id:r.id, name:r.name, plan:s.plan, fact:s.active}; }).sort((a,b)=>(+a.id)-(+b.id));
+  const P = out.reduce((a,x)=>a+x.plan,0), Fct = out.reduce((a,x)=>a+x.fact,0);
+  const resFree = reserves.filter(r=>r.kind==='free').length;
+  $('#vBody').innerHTML = `<div class="an-grid">
+    <section class="an-card an-wide" id="anReg"><header><h3>Регулярность по получасам</h3><p>доля рейсов в графике (±2 мин), последние 12 часов</p></header>
+      <div class="an-tiles"><div><span>Сейчас</span><b class="num">${String(regNow).replace('.',',')} %</b></div><div><span>Среднее за 12 ч</span><b class="num">${String(regAvg).replace('.',',')} %</b></div><div><span>Ниже норматива</span><b class="num">${reg.filter(d=>d.v<92).length} <small>из ${reg.length} получасов</small></b></div></div>
+      <div class="an-chart" data-chart="reg"></div></section>
+    <section class="an-card"><header><h3>Опоздания по маршрутам</h3><p>случаев за смену, сортировка по убыванию</p></header>
+      ${barsHTML(dl, dmax, x=>x.n, x=>`М${x.id} · ${x.name}: ${x.n} ${plural(x.n,'опоздание','опоздания','опозданий')}, в среднем ${String(x.avg).replace('.',',')} мин`)}</section>
+    <section class="an-card"><header><h3>Инциденты и реакция</h3><p>с момента сигнала до решения диспетчера</p></header>
+      <div class="an-tiles"><div><span>Инцидентов</span><b class="num">${inc.length}</b></div><div><span>Реакция, среднее</span><b class="num">${mmss(avgReact).replace(/^0/,'')}</b></div><div><span>Замена, среднее</span><b class="num">${avgRepl} <small>мин</small></b></div></div>
+      <h4>По типам</h4>${barsHTML(tRows, Math.max(...tRows.map(x=>x.n)), x=>x.n, x=>`${x.id}: ${x.n}`).replace(/<span class="rb">/g,'<span class="rb rb-t">')}</section>
+    <section class="an-card an-wide"><header><h3>Выход на линию</h3><p>план и факт по маршрутам</p></header>
+      <div class="an-tiles"><div><span>План</span><b class="num">${P}</b></div><div><span>На линии</span><b class="num">${Fct}</b></div><div><span>Резерв свободен</span><b class="num">${resFree} <small>из ${reserves.length}</small></b></div><div><span>Сход с линии</span><b class="num ${P-Fct>0?'is-crit':''}">${P-Fct}</b></div></div>
+      <ul class="c-plan">${out.map(x=>`<li data-tt="${esc(`М${x.id} · ${x.name}: на линии ${x.fact} из ${x.plan}`)}"><span class="rb">${x.id}</span><i>${Array.from({length:x.plan},(_,k)=>`<b class="${k<x.fact?'':'is-miss'}"></b>`).join('')}</i><span class="num">${x.fact} / ${x.plan}</span></li>`).join('')}</ul>
+      <div class="c-legend"><span><b></b>на линии</span><span><b class="is-miss"></b>не вышли / сход</span></div></section>
+  </div>`;
+  $('#vDetail').innerHTML = '';
+  const host = $('[data-chart="reg"]'); host.innerHTML = lineChart(reg, chartW(host));
+}
+/* подсказки: столбцы и график */
+const tt = $('#tt');
+function showTT(x, y, html){ tt.innerHTML = html; tt.hidden = false; const w = tt.offsetWidth, h = tt.offsetHeight; tt.style.left = clamp(x - w/2, 8, innerWidth - w - 8) + 'px'; tt.style.top = Math.max(8, y - h - 12) + 'px'; }
+$('#view').addEventListener('pointermove', e=>{
+  const hit = e.target.closest('.c-hit');
+  const svg = hit && hit.ownerSVGElement;
+  if(hit){
+    const pts = JSON.parse(hit.dataset.line); const box = svg.getBoundingClientRect(); const sx = svg.viewBox.baseVal.width/box.width;
+    const mx = (e.clientX - box.left)*sx; let k = 0; pts.forEach((p,i)=>{ if(Math.abs(p[2]-mx) < Math.abs(pts[k][2]-mx)) k = i; });
+    const p = pts[k]; const cr = svg.querySelector('.c-cross'), hv = svg.querySelector('.c-hov');
+    cr.setAttribute('x1',p[2]); cr.setAttribute('x2',p[2]); cr.setAttribute('visibility','visible'); hv.setAttribute('cx',p[2]); hv.setAttribute('cy',p[3]); hv.setAttribute('visibility','visible');
+    showTT(box.left + p[2]/sx, box.top + p[3]/sx, `<b class="num">${p[0]}</b> · регулярность <b class="num">${String(p[1]).replace('.',',')} %</b>`); return;
+  }
+  $$('#view .c-cross, #view .c-hov').forEach(n=>n.setAttribute('visibility','hidden'));
+  const it = e.target.closest('[data-tt]');
+  if(it){ const r = it.getBoundingClientRect(); showTT(r.left + r.width/2, r.top, esc(it.dataset.tt)); } else tt.hidden = true;
+});
+$('#view').addEventListener('pointerleave', ()=>{ tt.hidden = true; });
+window.addEventListener('resize', ()=>{ if(view==='analytics'){ clearTimeout(window.__anT); window.__anT = setTimeout(renderView, 150); } });
+/* живое обновление: списки и карточки пересчитываются раз в 3 с, пока раздел открыт и пользователь не печатает */
+setInterval(()=>{ if(view!=='map' && view!=='analytics' && document.activeElement?.dataset?.vq===undefined) renderView(); }, 3000);
+/* =====================================================================
+   Мобильная версия: шторка событий над картой, профиль и настройки по аватару
+   ===================================================================== */
+function isMobile(){ return matchMedia('(max-width:900px)').matches; }
+const SHEETS = ['peek','half','full'];
+function setSheet(st){ $('#side').dataset.sheet = st; }
+let sDrag = null, sMoved = false;
+const handle = $('#sheetHandle');
+handle.addEventListener('click', ()=>{ if(sMoved) return; const cur = $('#side').dataset.sheet; setSheet(SHEETS[(SHEETS.indexOf(cur)+1) % SHEETS.length]); });
+handle.addEventListener('pointerdown', e=>{ if(!isMobile()) return; const side = $('#side'); sDrag = {y:e.clientY, h:side.getBoundingClientRect().height}; sMoved = false; side.classList.add('is-drag'); handle.setPointerCapture(e.pointerId); });
+handle.addEventListener('pointermove', e=>{ if(!sDrag) return; const dy = sDrag.y - e.clientY; if(Math.abs(dy) > 5) sMoved = true; $('#side').style.height = clamp(sDrag.h + dy, 120, innerHeight - 80) + 'px'; });
+const endDrag = ()=>{ if(!sDrag) return; const side = $('#side'); const h = side.getBoundingClientRect().height; side.style.height = ''; side.classList.remove('is-drag'); sDrag = null;
+  if(sMoved){ const H = innerHeight; setSheet(h < H*0.3 ? 'peek' : h < H*0.68 ? 'half' : 'full'); } setTimeout(()=>{ sMoved = false; }, 0); };
+handle.addEventListener('pointerup', endDrag); handle.addEventListener('pointercancel', endDrag);
+// вкладки в свёрнутой шторке раскрывают её; выбор маршрута и «Показать» сворачивают, чтобы была видна карта
+$$('.side .tab').forEach(t=>t.addEventListener('click', ()=>{ if(isMobile() && $('#side').dataset.sheet==='peek') setSheet('half'); }));
+$('#rlist').addEventListener('click', ()=>{ if(isMobile()) setSheet('peek'); });
+$('#feedTop').addEventListener('click', e=>{ if(isMobile() && e.target.closest('[data-act="show"]')) setSheet('peek'); });
+// профиль: тема, звук, помощь
+function syncMe(){ $('#meThemeSw').classList.toggle('on', isDark()); $('#meSoundSw').classList.toggle('on', soundOn); $('#meShift').textContent = $('#shiftLine').textContent; }
+function openMe(on){ $('#meBg').hidden = !on; $('#meBtn').setAttribute('aria-expanded', on); if(on) syncMe(); }
+$('#meBtn').addEventListener('click', ()=>openMe(true));
+$('#meBg').addEventListener('click', e=>{
+  if(e.target.id==='meBg'){ openMe(false); return; }
+  const b = e.target.closest('[data-me]'); if(!b) return;
+  const k = b.dataset.me;
+  if(k==='theme') $('#themeBtn').click();
+  if(k==='sound') $('#soundBtn').click();
+  if(k==='help'){ openMe(false); $('#uxBtn').click(); return; }
+  if(k==='close'){ openMe(false); return; }
+  syncMe();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#meBg').hidden){ openMe(false); e.stopPropagation(); } }, true);
+// при смене раздела на телефоне карточка деталей закрывается — открывается список
+const _setView = setView;
+setView = function(v){ if(isMobile()){ $('#view').classList.remove('has-detail'); if(VS[v]) VS[v].sel = null; } _setView(v); if(v==='map' && isMobile()) setTimeout(()=>map.invalidateSize(), 60); };
+$$('[data-view]').forEach(b=>{ const nb = b.cloneNode(true); b.replaceWith(nb); nb.addEventListener('click', ()=>setView(nb.dataset.view)); });
+window.addEventListener('resize', ()=>{ clearTimeout(window.__mvT); window.__mvT = setTimeout(()=>{ map.invalidateSize(); placeLegend(); }, 200); });
+window.setView = (v)=>setView(v);
 loadYandex();
 window.addEventListener('resize', ()=> map.invalidateSize());
 })();
