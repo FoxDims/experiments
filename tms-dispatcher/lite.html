@@ -1892,6 +1892,33 @@ body:not(.is-brief) .bp-h .chip{display:none}
 @media (max-width:900px) and (prefers-reduced-motion:reduce){ .side,.me-sheet{transition:none;animation:none} }
 /* поиск в lite виден на любой ширине (старое правило прятало его на экранах уже 1180 px) */
 .search-top .search,.v-tools .search{display:flex!important}
+
+/* справка */
+.h-row .v-ic{width:36px;height:36px;border-radius:11px}
+.h-row .v-ic .ic{width:18px;height:18px}
+.h-art>.chip{margin-bottom:10px}
+.h-art h3{margin:0 0 14px;font-size:20px;font-weight:600;letter-spacing:-.015em;line-height:1.3}
+.h-art p{margin:0 0 12px;font-size:14px;line-height:1.55;color:var(--text-2)}
+.h-art b{color:var(--text);font-weight:600}
+.h-steps{margin:4px 0 16px;padding:0;list-style:none;counter-reset:st}
+.h-steps li{position:relative;padding:0 0 14px 40px;font-size:14px;line-height:1.5;color:var(--text-2);counter-increment:st}
+.h-steps li::before{content:counter(st);position:absolute;left:0;top:-2px;width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font:700 13px/26px var(--f-num);text-align:center}
+.h-steps li:not(:last-child)::after{content:"";position:absolute;left:12px;top:28px;bottom:2px;width:2px;background:var(--line)}
+.h-list{margin:4px 0 14px;padding-left:18px;font-size:14px;line-height:1.55;color:var(--text-2)}
+.h-list li{margin-bottom:8px}
+.h-legend{list-style:none;margin:4px 0 14px;padding:0;display:flex;flex-direction:column;gap:10px}
+.h-legend li{display:grid;grid-template-columns:150px 1fr;gap:12px;align-items:center}
+.h-legend li p{margin:0;font-size:13px}
+.h-note{display:flex;gap:12px;padding:12px 14px;border-radius:16px;background:var(--brand-soft);margin:4px 0 14px}
+.h-note .ic{color:var(--brand);flex:none;margin-top:2px}
+.h-note p{margin:0;color:var(--text)}
+.h-keys{margin:0;display:flex;flex-direction:column}
+.h-keys div{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.h-keys div:last-child{border-bottom:0}
+.h-keys dt{display:flex;gap:4px;align-items:center}
+.h-keys dd{margin:0;font-size:14px;color:var(--text-2)}
+.h-art .kbd{font-size:11.5px}
+@media (max-width:900px){ .h-legend li{grid-template-columns:1fr;gap:4px} .h-row .chip{display:none!important} }
 </style>
 </head>
 <body>
@@ -1914,7 +1941,7 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <button class="rail-btn" id="railInc" data-view="incidents"><span data-ic="alert"></span><span class="tip">Инциденты</span><span class="dot" id="railDot" hidden>1</span></button>
     <button class="rail-btn" data-view="analytics"><span data-ic="chart"></span><span class="tip">Аналитика</span></button>
     <div class="rail-spacer"></div>
-    <button class="rail-btn" id="uxBtn"><span data-ic="book"></span><span class="tip">UX-логика прототипа</span></button>
+    <button class="rail-btn" id="uxBtn" data-view="help"><span data-ic="book"></span><span class="tip">Справка</span></button>
     <button class="rail-btn" id="soundBtn" aria-pressed="true"><span data-ic="volume"></span><span class="tip">Звук аварий: вкл</span></button>
     <button class="rail-btn" id="themeBtn"><span data-ic="moon"></span><span class="tip">Сменить тему</span></button>
     <div class="avatar" tabindex="0" aria-describedby="userTip">АМ<span class="tip user-tip" id="userTip" role="tooltip"><b>Морозова А. С.</b><span id="shiftLine">Старший диспетчер</span></span></div>
@@ -1994,7 +2021,6 @@ body:not(.is-brief) .bp-h .chip{display:none}
   <section class="drawer" id="drawer" aria-label="Замена автобуса" aria-hidden="true"></section>
 </div>
 
-<div class="ux" id="ux" hidden></div>
 <nav class="tabbar" aria-label="Разделы">
   <button data-view="map" class="is-active"><span data-ic="map"></span><b>Карта</b></button>
   <button data-view="routes"><span data-ic="route"></span><b>Маршруты</b></button>
@@ -2009,7 +2035,7 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <div class="me-user"><span class="avatar">АМ</span><div><b>Морозова А. С.</b><span id="meShift">Старший диспетчер</span></div></div>
     <button class="me-row" data-me="theme"><span data-ic="moon"></span><span>Тёмная тема</span><i class="sw" id="meThemeSw"></i></button>
     <button class="me-row" data-me="sound"><span data-ic="volume"></span><span>Звук аварий</span><i class="sw" id="meSoundSw"></i></button>
-    <button class="me-row" data-me="help"><span data-ic="book"></span><span>Помощь · как устроен прототип</span><i class="me-go"></i></button>
+    <button class="me-row" data-me="help"><span data-ic="book"></span><span>Справка</span><i class="me-go"></i></button>
     <button class="btn btn-ghost me-close" data-me="close">Закрыть</button>
   </div>
 </div>
@@ -3150,7 +3176,6 @@ function rebuildFleet(){ buildFleet(); }
 document.addEventListener('keydown', e=>{
   const tag = (e.target.tagName||'').toLowerCase();
   if(tag==='input' && e.target.type==='text'){ if(e.key==='Escape') e.target.blur(); return; }
-  if(!$('#ux').hidden){ if(e.key==='Escape') closeUX(); return; }
   if(e.key==='/' ){ e.preventDefault(); $('#search').focus(); return; }
   if((e.key==='r'||e.key==='R'||e.key==='к'||e.key==='К') && !e.ctrlKey && !e.metaKey && !e.altKey){ resetScenario(); return; }
   if(e.key==='Escape'){ if($('#drawer').classList.contains('is-open')) closeDrawer(); else if(selRoute) selectRoute(selRoute); return; }
@@ -3189,85 +3214,6 @@ $$('[data-stub]').forEach(b=>b.addEventListener('click', ()=>toast('Раздел
 /* «Инциденты» — теперь раздел (см. блок «Разделы») */
 
 /* ================= UX page ================= */
-function renderUX(){
-  const you = lastReaction!=null ? mmss(lastReaction) : '—';
-  $('#ux').innerHTML = `<div class="ux-in">
-  <div class="ux-top">${$('.logo').outerHTML}<div><h2>SmartTransport · UX-логика</h2><p>Пояснения к прототипу рабочего места диспетчера</p></div><button class="btn btn-ghost" data-ux-close>${ic('x')}Вернуться к карте <span class="kbd">Esc</span></button></div>
-
-  <div class="ux-hero">
-    <div><h1>От сигнала о поломке до замены — меньше 30 секунд и два нажатия</h1>
-    <p>Диспетчер не ищет проблему: система сама поднимает её наверх, собирает данные в одном окне и заранее выбирает лучший резервный автобус. Человек проверяет и подтверждает решение.</p></div>
-    <div class="ux-big"><div><b>2</b><span>нажатия: «Решить» и «Назначить»</span></div><div><b>&lt;30 с</b><span>целевое время реакции</span></div><div><b class="you">${you}</b><span>ваше время в демо</span></div></div>
-  </div>
-
-  <section class="ux-sec"><h3>User Flow</h3><h4>Путь диспетчера: заметить, понять, решить, проконтролировать</h4>
-    <div class="flow">
-      <div class="fl crit"><div class="fl-n"><i>1</i><span>0 с</span></div><b>Сигнал</b><p>Водитель нажал тревожную кнопку, телеметрия подтвердила перегрев. Сработали баннер над картой, пульсирующая точка, счётчик аварий и звук.</p></div>
-      <div class="fl"><div class="fl-n"><i>2</i><span>~3 с</span></div><b>Осознание</b><p>Из баннера сразу видно: какой маршрут, какой борт, где и каковы последствия («интервал вырастет до 23 мин»). Остальной транспорт приглушается.</p></div>
-      <div class="fl click"><div class="fl-n"><i>3</i><span>~1 с</span></div><b>«Решить»</b><p>Одна кнопка в баннере, в ленте или Enter. Открывается панель справа, а карта остаётся видна.</p><span class="act">Нажатие 1</span></div>
-      <div class="fl"><div class="fl-n"><i>4</i><span>10–15 с</span></div><b>Проверка</b><p>Лучший кандидат уже выбран и помечен «Рекомендуем» с причинами. Если нужен другой — клавиши 1–4. На карте видны пути и время доезда.</p></div>
-      <div class="fl click"><div class="fl-n"><i>5</i><span>~1 с</span></div><b>«Назначить»</b><p>Кнопка подтверждения без лишних диалогов. Сопутствующие действия (техпомощь, оповещение) уже включены.</p><span class="act">Нажатие 2</span></div>
-      <div class="fl ok"><div class="fl-n"><i>6</i><span>фон</span></div><b>Контроль</b><p>Статус в баннере и ленте: подтверждение водителя, движение, прибытие. 10 секунд на отмену. Маршрут возвращается к норме.</p></div>
-    </div>
-    <div class="timeline"><i style="flex:1;background:var(--crit-dot)"></i><i style="flex:3;background:var(--line-strong)"></i><i style="flex:1;background:var(--brand)"></i><i style="flex:12;background:var(--line-strong)"></i><i style="flex:1;background:var(--brand)"></i></div>
-    <div class="tl-cap"><span>0 с · сигнал</span><span>≈ 5 с · окно решения</span><span>≈ 20–25 с · назначено</span></div>
-  </section>
-
-  <section class="ux-sec"><h3>Состояния</h3><h4>Покой и авария выглядят по-разному с первого взгляда</h4>
-    <div class="grid2">
-      <div class="card"><div class="state-demo"><div class="road" style="left:6%;right:6%;top:54%"></div><div class="road" style="left:40%;width:4px;height:auto;top:8%;bottom:8%"></div>
-        <div class="bm s-ok" style="left:16%;top:47%">10</div><div class="bm s-ok" style="left:62%;top:47%">35</div><div class="bm s-warn" style="left:36%;top:18%">24</div><div class="bm s-ok" style="left:36%;top:72%">16</div></div>
-        <h5>Покой</h5><ul><li>Почти всё нейтральное: серые линии маршрутов, белые маркеры с зелёной рамкой.</li><li>Цветом выделены только отклонения: жёлтые и оранжевые рамки или заливки.</li><li>Счётчик аварий — «0» с зелёной точкой. Мелькания и звуков нет.</li></ul></div>
-      <div class="card"><div class="state-demo"><div class="alert-mini">${ic('alert')}Авария · М10 · Борт 1047</div><div class="road" style="left:6%;right:6%;top:58%;background:var(--crit-dot);box-shadow:none"></div><div class="road" style="left:40%;width:4px;height:auto;top:8%;bottom:8%;opacity:.4"></div>
-        <div class="bm s-crit" style="left:46%;top:51%">10</div><div class="bm s-ok" style="left:62%;top:51%;opacity:.3">35</div><div class="bm s-warn" style="left:36%;top:30%;opacity:.3">24</div><div class="bm s-ok r10" style="left:16%;top:51%">10</div></div>
-        <h5>Авария</h5><ul><li>Сигналы дублируют друг друга: баннер над картой, карточка в ленте, пульсация на карте, счётчик в шапке и вкладке браузера, звук. Вкладку тоже видно, если диспетчер работает в другом окне.</li><li>Маршрут 10 становится красным, остальной транспорт приглушается до 30 %.</li><li>Карта сама не двигается: диспетчер не теряет текущий контекст и решает, когда переключиться.</li></ul></div>
-    </div>
-  </section>
-
-  <section class="ux-sec"><h3>Цветовое кодирование</h3><h4>У каждого цвета одно значение</h4>
-    <div class="card tbl-wrap"><table class="ctable"><thead><tr><th>Статус</th><th>Порог</th><th>Как выглядит</th><th>Зачем так</th></tr></thead><tbody>
-      <tr><td><span class="sdot ok"></span>&nbsp; Норма</td><td class="num">|Δ| ≤ 2 мин</td><td><span class="bm s-ok" style="display:inline-grid">10</span></td><td>Только рамка, без заливки: норма не должна привлекать внимание.</td></tr>
-      <tr><td><span class="sdot warn"></span>&nbsp; Небольшое опоздание</td><td class="num">2–5 мин</td><td><span class="bm s-warn" style="display:inline-grid">24</span></td><td>Жёлтая рамка: заметно при поиске, но не отвлекает.</td></tr>
-      <tr><td><span class="sdot late"></span>&nbsp; Сбой графика</td><td class="num">&gt; 5 мин</td><td><span class="bm s-late" style="display:inline-grid">35</span></td><td>Оранжевая заливка: виден с любого масштаба, требует внимания, но не срочно.</td></tr>
-      <tr><td><span class="sdot crit"></span>&nbsp; Авария</td><td>сход с линии</td><td><span class="bm s-crit" style="display:inline-grid;transform:none">10</span></td><td>Красный используется только для аварий: он не обесценивается, поэтому реакция на него мгновенная.</td></tr>
-      <tr><td><span class="sdot brand"></span>&nbsp; Действие / выбор</td><td>—</td><td><span class="chip brand">Рекомендуем</span></td><td>Фирменный фиолетовый не означает никакого статуса. Им отмечено то, что выбрано или что можно нажать.</td></tr>
-    </tbody></table>
-    <p class="note">Статус дублируется формой и текстом (рамка → заливка → увеличение и пульсация), поэтому различим и при нарушениях цветового зрения.</p></div>
-  </section>
-
-  <section class="ux-sec"><h3>Окно решения</h3><h4>Всё для решения на одном экране, без переходов</h4>
-    <div class="grid3">
-      <div class="card"><h5>1. Что случилось</h5><p>Карточка сломанного борта: номер, госномер, место с ближайшей остановкой и координатами, время, причина по телеметрии, пассажиры, связь с водителем.</p></div>
-      <div class="card"><h5>2. Чем грозит</h5><p>Линейная схема маршрута и интервалы «сейчас / после замены». Видно, где образуется разрыв, сколько остановок и пассажиров затронуто.</p></div>
-      <div class="card"><h5>3. Кем заменить</h5><p>Резерв отсортирован по времени доезда с учётом доступности. Для каждого кандидата видны причины и риски: «занят на другом маршруте — интервал там вырастет», «меньше мест», «перерыв до 22:10».</p></div>
-    </div>
-    <div class="card" style="margin-top:16px"><h5>Как система ранжирует резерв</h5><p>Оценка прозрачна, решение остаётся за диспетчером:</p>
-      <div class="formula">оценка = время_доезда + подготовка
-       + 6 мин, если борт занят на другом маршруте
-       + 2 мин, если выезд из депо
-       + 3 мин, если вместимость меньше, чем у сломанного
-       недоступен, если у водителя перерыв по графику труда</div></div>
-  </section>
-
-  <section class="ux-sec"><h3>Детали</h3><h4>Решения для сменной работы</h4>
-    <div class="grid2">
-      <div class="card"><h5>Ночная смена</h5><ul><li>Тёмная тема без чистого чёрного и белого: графит с лёгким фиолетовым оттенком.</li><li>Подложка карты приглушена, данные контрастнее фона.</li><li>Анимация только у критичных объектов, звук можно выключить одной кнопкой.</li></ul></div>
-      <div class="card"><h5>Мгновенное чтение данных</h5><ul><li>Номера, время и отклонения набраны моноширинным шрифтом с цифрами одной ширины: при обновлении цифры не прыгают.</li><li>Отклонения со знаком: <span class="num">+7:10</span>, <span class="num">−1:04</span>.</li><li>Номер маршрута прямо на маркере, номер борта — по нажатию.</li></ul></div>
-      <div class="card"><h5>Сначала главное</h5><ul><li>Карточки краткие: номер борта, время доезда, доступность и только те бейджи, где что-то не в норме.</li><li>Раскрывается то, с чем диспетчер работает: выбранный резерв, выбранный маршрут, событие по клику, «Подробнее» у сломанного борта и в окне автобуса.</li><li>Легенда статусов свёрнута в кнопку над картой, у карты два вида: «Схема» и «Карта» (только дороги).</li></ul></div>
-      <div class="card"><h5>Телефон</h5><ul><li>Разделы — в таб-баре внизу, до него дотягивается большой палец; тема, звук и помощь спрятаны в профиль — ими пользуются редко.</li><li>События — шторка над картой: свёрнута до строки, авария раскрывает её сама, «Показать» сворачивает, чтобы была видна карта.</li><li>Окно замены открывается во весь экран, «Назначить» закреплена внизу.</li></ul></div>
-      <div class="card"><h5>Защита от ошибок</h5><ul><li>Недоступные кандидаты нельзя выбрать, причина указана.</li><li>После назначения 10 секунд на отмену, без модальных «Вы уверены?».</li><li>Каждое действие попадает в ленту смены с временем.</li></ul></div>
-    </div>
-    <div class="grid2" style="margin-top:16px">
-      <div class="card"><h5>Горячие клавиши</h5><div class="keys"><span class="kbd">Enter</span><span>Решить аварию / назначить выбранный борт</span><span class="kbd">1–4</span><span>Выбрать кандидата в окне замены</span><span class="kbd">R</span><span>Перезапустить демо-сценарий</span><span class="kbd">Esc</span><span>Закрыть панель, снять выделение маршрута</span><span class="kbd">/</span><span>Поиск по борту, маршруту или остановке</span></div></div>
-      <div class="card"><h5>Допущения прототипа</h5><ul><li>Трассы и остановки маршрута 10 и шести соседних взяты с bus62.ru. Бортовые номера, водители, резерв и отклонения от графика смоделированы.</li><li>Подложка — Яндекс Карты (JS API 3.0). В режиме «Минимум» скрыты организации, транспорт Яндекса, адреса и разметка: остаются улицы, вода, парки и здания. Без доступа к API показывается собственная схема сети маршрутов.</li><li>Движение смоделировано, а путь резервного борта ускорен в 30 раз.</li></ul></div>
-    </div>
-  </section>
-  </div>`;
-}
-function openUX(){ renderUX(); $('#ux').hidden=false; $('#ux').scrollTop=0; }
-function closeUX(){ $('#ux').hidden=true; }
-$('#uxBtn').addEventListener('click', openUX);
-$('#ux').addEventListener('click', e=>{ if(e.target.closest('[data-ux-close]')) closeUX(); });
 
 /* ================= boot ================= */
 buildRoutes();
@@ -3296,10 +3242,11 @@ const VIEWS = {
   routes:{title:'Маршруты и расписания'},
   fleet:{title:'Подвижной состав'},
   incidents:{title:'Инциденты'},
-  analytics:{title:'Аналитика смены'}
+  analytics:{title:'Аналитика смены'},
+  help:{title:'Справка'}
 };
 let view = 'map';
-const VS = {routes:{q:'',f:'all',sel:null}, fleet:{q:'',f:'all',sel:null}, incidents:{q:'',f:'all',sel:null}, analytics:{}};
+const VS = {routes:{q:'',f:'all',sel:null}, fleet:{q:'',f:'all',sel:null}, incidents:{q:'',f:'all',sel:null}, analytics:{}, help:{q:'',f:'all',sel:'replace'}};
 const SR = rng(2026);
 const seeded = {};                       // стабильные «смоделированные» значения по ключу
 const sv = (key, fn) => (seeded[key] ??= fn(SR));
@@ -3325,7 +3272,7 @@ function renderView(){
   const v = VIEWS[view];
   $('#vTitle').textContent = v.title;
   $('#view').classList.toggle('is-wide', view==='analytics');
-  ({routes:renderRoutesView, fleet:renderFleetView, incidents:renderIncView, analytics:renderAnalytics})[view]();
+  ({routes:renderRoutesView, fleet:renderFleetView, incidents:renderIncView, analytics:renderAnalytics, help:renderHelp})[view]();
 }
 function toolsHTML(st, filters, placeholder){
   return `<label class="search v-search"><span>${ic('search')}</span><input data-vq placeholder="${placeholder}" value="${esc(st.q)}" autocomplete="off"></label>
@@ -3348,6 +3295,7 @@ function vAction(act, arg){
   if(act==='inc-show'){ setView('map'); if(incident) focusIncident(); }
   if(act==='inc-solve'){ setView('map'); openDecision(); }
   if(act==='inc-progress'){ setView('map'); openDrawer(); }
+  if(act==='help-go'){ if(arg==='map') setView('map'); else if(arg==='inc-solve'){ if(state==='incident'||state==='deciding'){ setView('map'); openDecision(); } else { setView('incidents'); toast('Активных аварий нет — открыт список инцидентов'); } } }
 }
 const kv = (rows) => `<dl class="v-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
 const empty = (t) => `<div class="v-empty">${t}</div>`;
@@ -3572,6 +3520,113 @@ function renderAnalytics(){
   $('#vDetail').innerHTML = '';
   const host = $('[data-chart="reg"]'); host.innerHTML = lineChart(reg, chartW(host));
 }
+/* ---------- Справка для диспетчера ---------- */
+const HELP_CAT = {crash:'Авария', ui:'Интерфейс', faq:'Вопросы'};
+const kbd = k => `<span class="kbd">${k}</span>`;
+const HELP = [
+  {id:'replace', cat:'crash', icon:'alert', title:'Как заменить сломанный автобус', sum:'От сигнала до замены — два нажатия',
+   body:`<p>Когда водитель нажимает тревожную кнопку или телеметрия фиксирует неисправность, система сама сообщает об аварии: над картой появляется красный баннер, в ленте событий — карточка аварии, звучит сигнал.</p>
+   <ol class="h-steps">
+     <li><b>Нажмите «Решить»</b> в баннере или в ленте, либо клавишу ${kbd('Enter')}. Справа откроется окно замены, карта останется на экране.</li>
+     <li><b>Проверьте рекомендацию.</b> Лучший резервный автобус уже выбран и помечен «Рекомендуем». Рядом — время доезда и всё, что может помешать: занят на другом маршруте, меньше мест, мало топлива.</li>
+     <li><b>При необходимости выберите другой</b> — нажмите на карточку или клавишу ${kbd('1')}–${kbd('4')}. Шеврон справа раскрывает подробности: модель, госномер, водителя.</li>
+     <li><b>Отметьте сопутствующие действия</b> — техпомощь, пересадка пассажиров, оповещение на табло. По умолчанию включены все три.</li>
+     <li><b>Нажмите «Назначить на маршрут»</b> или ${kbd('Enter')}. Команда уйдёт на бортовой терминал резерва.</li>
+   </ol>
+   <div class="h-note">${ic('clock')}<p>10 секунд после назначения его можно отменить кнопкой «Отменить». Подтверждающих окон «Вы уверены?» нет — чтобы не терять время.</p></div>
+   <p>Дальше следите за заменой: на карте видно, как резерв едет к месту поломки, в ленте — сколько осталось до прибытия. Когда замена выйдет на линию, инцидент закроется сам.</p>`,
+   go:['inc-solve','Открыть активную аварию']},
+  {id:'reserve', cat:'crash', icon:'bus', title:'Как система выбирает резерв', sum:'Время доезда плюс штрафы за неудобства',
+   body:`<p>Резервные автобусы сортируются по оценке — чем меньше, тем лучше. В основе — время доезда до места поломки, к нему добавляются минуты за всё, что усложняет замену:</p>
+   <ul class="h-list">
+     <li><b>+6 мин</b>, если автобус сейчас работает на другом маршруте — там вырастет интервал, это видно в карточке.</li>
+     <li><b>+2 мин</b>, если нужно выехать из депо.</li>
+     <li><b>+3 мин</b>, если мест меньше, чем у сломанного автобуса.</li>
+     <li><b>Недоступен</b>, если у водителя перерыв по графику труда — такой резерв нельзя выбрать.</li>
+   </ul>
+   <p>Рекомендация — подсказка, а не решение. Окончательный выбор всегда за диспетчером.</p>`},
+  {id:'colors', cat:'ui', icon:'pin', title:'Цвета и статусы автобусов', sum:'Что означает каждый цвет на карте и в списках',
+   body:`<p>У каждого цвета одно значение — на карте, в ленте, в разделах и в показателях.</p>
+   <ul class="h-legend">
+     <li><span class="chip ok">По графику</span><p>Отклонение не больше 2 минут.</p></li>
+     <li><span class="chip warn">Опоздание до 5 мин</span><p>Стоит присмотреться, вмешательство обычно не нужно.</p></li>
+     <li><span class="chip late">Опоздание > 5 мин</span><p>Сбой графика — интервал на маршруте растёт.</p></li>
+     <li><span class="chip crit">Авария</span><p>Автобус сошёл с линии, нужно решение диспетчера.</p></li>
+     <li><span class="chip brand">Едет на замену</span><p>Резерв назначен и едет к месту поломки.</p></li>
+     <li><span class="chip mute">Резерв · в депо</span><p>Резервный автобус, рамка вместо заливки.</p></li>
+   </ul>
+   <p>Отклонение пишется со знаком: <span class="num">+7:10</span> — опаздывает, <span class="num">−1:04</span> — идёт с опережением.</p>`},
+  {id:'map', cat:'ui', icon:'map', title:'Карта: слои, поиск, вид подложки', sum:'Остановки, резерв, «Статус ТС», схема и карта',
+   body:`<ul class="h-list">
+     <li><b>Поиск</b> сверху: номер борта, маршрута или название остановки. Клавиша ${kbd('/')} ставит курсор в поиск.</li>
+     <li><b>«Остановки» и «Резерв»</b> включают и выключают слои на карте.</li>
+     <li><b>«Статус ТС»</b> раскрывает легенду с количеством автобусов в каждом статусе.</li>
+     <li><b>«Схема / Карта»</b> — собственная схема сети или карта города (только дороги и улицы, без лишнего).</li>
+     <li><b>Нажмите на автобус</b>, чтобы увидеть маршрут, отклонение и следующую остановку; «Подробнее» в окошке покажет водителя и загрузку.</li>
+     <li><b>Нажмите на маршрут</b> во вкладке «Маршруты» справа — остальные приглушатся, карта приблизится к нему. ${kbd('Esc')} снимает выделение.</li>
+   </ul>
+   <p>Внизу — показатели смены: сколько автобусов на линии, регулярность, опоздания, аварии и резерв.</p>`, go:['map','Перейти к карте']},
+  {id:'sections', cat:'ui', icon:'route', title:'Разделы системы', sum:'Где искать маршруты, автобусы, инциденты и отчёты',
+   body:`<ul class="h-list">
+     <li><b>Оперативная карта</b> — где все автобусы прямо сейчас и что происходит на линии.</li>
+     <li><b>Маршруты и расписания</b> — интервалы, первый и последний рейс, регулярность, какие автобусы работают на маршруте.</li>
+     <li><b>Подвижной состав</b> — все автобусы и резерв: водитель, загрузка, топливо, пробег, когда ТО.</li>
+     <li><b>Инциденты</b> — открытые и решённые за смену, хронология и время реакции.</li>
+     <li><b>Аналитика</b> — регулярность по получасам, опоздания по маршрутам, скорость реакции, выход на линию.</li>
+   </ul>
+   <p>В каждом разделе есть поиск и фильтры. Нажмите на строку — справа откроется карточка, а кнопка «Показать на карте» вернёт к карте с нужным автобусом или маршрутом.</p>`},
+  {id:'events', cat:'ui', icon:'volume', title:'Лента событий и звук', sum:'Что попадает в ленту и как работает сигнал',
+   body:`<p>В ленту смены попадает всё, что требует внимания: опоздания, возвращения в график, назначения, изменения резерва. Каждое событие — одной строкой; нажмите на него, чтобы прочитать подробности.</p>
+   <p>Авария всегда стоит отдельной карточкой над лентой, пока не решена. Звуковой сигнал повторяется каждые 7 секунд, пока аварию не взяли в работу. Звук выключается кнопкой с динамиком в левом меню или в профиле на телефоне.</p>`},
+  {id:'keys', cat:'ui', icon:'nav', title:'Горячие клавиши', sum:'Работа без мыши',
+   body:`<dl class="h-keys">
+     <div><dt>${kbd('Enter')}</dt><dd>Решить аварию · назначить выбранный резерв</dd></div>
+     <div><dt>${kbd('1')}–${kbd('4')}</dt><dd>Выбрать резерв в окне замены</dd></div>
+     <div><dt>${kbd('Esc')}</dt><dd>Закрыть окно, снять выделение маршрута</dd></div>
+     <div><dt>${kbd('/')}</dt><dd>Поиск по борту, маршруту или остановке</dd></div>
+     <div><dt>${kbd('R')}</dt><dd>Перезапустить демонстрационную аварию</dd></div>
+   </dl>`},
+  {id:'mobile', cat:'ui', icon:'nav', title:'Работа с телефона', sum:'Таб-бар, шторка событий, профиль',
+   body:`<ul class="h-list">
+     <li><b>Разделы</b> — в нижней панели: Карта, Маршруты, Состав, Инциденты, Аналитика.</li>
+     <li><b>События</b> — в шторке над картой. Потяните за ручку или нажмите на неё: свёрнута, половина экрана, весь экран. При аварии шторка раскрывается сама.</li>
+     <li><b>Окно замены</b> открывается во весь экран, кнопка «Назначить» всегда внизу.</li>
+     <li><b>Тема, звук и справка</b> — в профиле: нажмите на свой аватар в нижней панели.</li>
+   </ul>`},
+  {id:'wrong', cat:'faq', icon:'reset', title:'Назначил не тот автобус — что делать?', sum:'Отмена в течение 10 секунд',
+   body:`<p>Сразу после назначения в окне есть кнопка <b>«Отменить»</b> с обратным отсчётом — 10 секунд. Нажмите её, и всё вернётся к выбору резерва: команда водителю будет отозвана, авария снова станет открытой.</p>
+   <p>Если 10 секунд прошли — свяжитесь с водителем по рации и назначьте другой резерв из раздела «Подвижной состав».</p>`},
+  {id:'noreco', cat:'faq', icon:'bus', title:'Рекомендованный резерв не подходит', sum:'Можно выбрать любой доступный',
+   body:`<p>Выберите другой автобус в списке «Кем заменить» — нажатием или клавишами ${kbd('1')}–${kbd('4')}. Серые карточки недоступны: у водителя перерыв по графику труда, причина написана в карточке.</p>
+   <p>Если в списке нет подходящего, проверьте раздел «Подвижной состав» → фильтр «Резерв».</p>`},
+  {id:'nomap', cat:'faq', icon:'map', title:'Не загружается карта города', sum:'Остаётся схема — работать можно',
+   body:`<p>Если карта города недоступна (нет связи с сервисом карт), система автоматически показывает собственную схему маршрутной сети. Все функции работают: автобусы, остановки, резерв, замена.</p>
+   <p>Переключатель «Карта» в этом случае неактивен, подсказка на нём объясняет причину. Сообщите в техподдержку, если карта не появляется дольше 15 минут.</p>`},
+  {id:'delay', cat:'faq', icon:'clock', title:'Почему автобус «опаздывает», хотя едет?', sum:'Сравнение с расписанием, а не со скоростью',
+   body:`<p>Статус считается по отклонению от расписания: где автобус должен быть сейчас и где он есть. Если он задержался на остановке или в заторе, он может ехать, но всё равно отставать от графика.</p>
+   <p>Опоздание до 5 минут обычно выравнивается само; больше 5 минут — повод проверить маршрут в разделе «Маршруты и расписания».</p>`}
+];
+function renderHelp(){
+  const st = VS.help;
+  $('#vSub').textContent = 'Как работать с системой: авария, карта, разделы, частые вопросы';
+  const n = c => HELP.filter(a=>a.cat===c).length;
+  $('#vTools').innerHTML = toolsHTML(st, [['all','Все',HELP.length],['crash','Авария',n('crash')],['ui','Интерфейс',n('ui')],['faq','Вопросы',n('faq')]], 'Поиск по справке');
+  bindTools(st);
+  const q = st.q.trim().toLowerCase();
+  const list = HELP.filter(a=>(st.f==='all'||a.cat===st.f) && (!q || (a.title+' '+a.sum+' '+a.body.replace(/<[^>]+>/g,' ')).toLowerCase().includes(q)));
+  $('#vBody').innerHTML = list.length ? `<ul class="v-list">${list.map(a=>`<li class="v-row h-row${st.sel===a.id?' is-sel':''}" data-vid="${a.id}" tabindex="0">
+      <span class="v-ic ${a.cat==='crash'?'crit':a.cat==='faq'?'warn':'brand'}">${ic(a.icon)}</span>
+      <div class="v-row-main"><b>${a.title}</b><span>${a.sum}</span></div>
+      <span class="chip mute">${HELP_CAT[a.cat]}</span>
+    </li>`).join('')}</ul>` : empty('Ничего не найдено. Попробуйте другое слово');
+  const a = st.sel && HELP.find(x=>x.id===st.sel);
+  $('#vDetail').innerHTML = a ? `<article class="v-card h-art">
+      <span class="chip mute">${HELP_CAT[a.cat]}</span>
+      <h3>${a.title}</h3>
+      ${a.body}
+      ${a.go ? `<button class="btn btn-primary v-cta" data-vact="help-go" data-arg="${a.go[0]}">${a.go[1]}</button>` : ''}
+    </article>` : `<div class="v-ph">${ic('book')}<p>Выберите тему, чтобы прочитать статью</p></div>`;
+}
 /* подсказки: столбцы и график */
 const tt = $('#tt');
 function showTT(x, y, html){ tt.innerHTML = html; tt.hidden = false; const w = tt.offsetWidth, h = tt.offsetHeight; tt.style.left = clamp(x - w/2, 8, innerWidth - w - 8) + 'px'; tt.style.top = Math.max(8, y - h - 12) + 'px'; }
@@ -3621,7 +3676,7 @@ $('#meBg').addEventListener('click', e=>{
   const k = b.dataset.me;
   if(k==='theme') $('#themeBtn').click();
   if(k==='sound') $('#soundBtn').click();
-  if(k==='help'){ openMe(false); $('#uxBtn').click(); return; }
+  if(k==='help'){ openMe(false); setView('help'); return; }
   if(k==='close'){ openMe(false); return; }
   syncMe();
 });
