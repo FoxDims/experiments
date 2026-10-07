@@ -1919,6 +1919,8 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .h-keys dd{margin:0;font-size:14px;color:var(--text-2)}
 .h-art .kbd{font-size:11.5px}
 @media (max-width:900px){ .h-legend li{grid-template-columns:1fr;gap:4px} .h-row .chip{display:none!important} }
+/* средние окна (901–1280 px): кнопки слоёв уже во второй строке — поиск занимает всю ширину от левого края карты до переключателя «Схема / Карта» */
+@media (min-width:901px) and (max-width:1280px){ .search-top{left:16px!important;right:calc(16px + var(--bm-w,132px) + 12px)!important;width:auto!important;max-width:none!important;transform:none!important} }
 </style>
 </head>
 <body>
