@@ -1325,6 +1325,9 @@ body:not(.is-brief) .bp-h .chip{display:none}
   .stage.row-tight .search-top{left:16px!important;max-width:none!important}
   .stage.row-tight .alert{top:128px!important}
 }
+
+/* подпись «борт · время доезда» — над автобусом резерва */
+.eta-tag.at-bus{transform:translate(-50%,calc(-100% - 14px))}
 </style>
 </head>
 <body>
@@ -1666,6 +1669,7 @@ function buildFleet(){
   ];
   assignRoles();
   if(REAL) placeReservesReal();
+  setupBusyReserve();
 }
 /* Резерв на реальной сети: смещение от места аварии в метрах (x — восток, y — север), затем привязка к ближайшей трассе */
 function snapTo(target, routeIds){
@@ -1694,6 +1698,13 @@ function placeReservesReal(){
   Object.assign(byId('2214'), {ll:depot.ll, place:'Депо ПАТП № 2'});
   const st10 = routes['10'].stops; const term = st10[st10.length-1];
   Object.assign(byId('2302'), {ll:term.ll, place:`Конечная «${term.name}»`});
+}
+/* резерв, занятый на другом маршруте, едет по нему, пока диспетчер не открыл окно замены */
+function setupBusyReserve(){
+  const r = reserves.find(x=>x.kind==='busy'); if(!r) return;
+  let rid = r.busyRoute && routes[r.busyRoute] ? r.busyRoute : (snapTo(r.ll, Object.keys(routes).filter(id=>id!=='10'))||{}).route; if(!rid) return;
+  r.onRoute = rid; r.phase = project(routes[rid].path, r.ll); r.ll = busPos({route:rid, phase:r.phase}).ll;
+  r.impact = `Интервал на М${rid} вырастет с 12 до 17 мин`;
 }
 function busPos(b){ const r=routes[b.route]; const L=r.path.len; const ph=b.phase; const fwd = ph < L; const d = fwd ? ph : 2*L-ph; const p=pointAt(r.path,d); return {...p, d, fwd}; }
 function nextStop(b){ const r=routes[b.route]; const p=busPos(b); const list = p.fwd ? r.stops.filter(s=>s.d>p.d+20) : r.stops.filter(s=>s.d<p.d-20).reverse(); const s = list[0] || (p.fwd ? r.stops[r.stops.length-1] : r.stops[0]); return {stop:s, dist:Math.abs(s.d-p.d), fwd:p.fwd}; }
@@ -1943,7 +1954,7 @@ function applyGeometry(){
   });
   if(!n) return;
   geoReal = true;
-  relocateReserves(); drawReserves();
+  relocateReserves(); setupBusyReserve(); drawReserves();
   Object.values(buses).forEach(b => { busMarkers[b.id] && busMarkers[b.id].setLatLng(busPos(b).ll); });
   renderRoutes(); fitCity(true);
   toast(`${ic('route')} Трассы ${n} ${plural(n,'маршрута','маршрутов','маршрутов')} построены по улицам Рязани`);
@@ -1967,7 +1978,40 @@ function rememberReserveOffsets(){
   const ixy = toXY(pointAt(routes['10'].path, incD).ll);
   reserves.forEach(r => { const xy = toXY(r.ll); RES_OFFSETS[r.id] = [xy[0]-ixy[0], xy[1]-ixy[1]]; });
 }
-function routeCandidates(){ candRoutes = {}; candLocked = false; } /* время доезда резерва — по формуле (без маршрутизатора) */
+/* ---------- Путь резерва к месту аварии — по дорогам ----------
+   Отдельного маршрутизатора нет, поэтому граф дорог собирается из трасс всех маршрутов:
+   трасса прореживается до точки через каждые 40 м, точки разных маршрутов ближе 35 м склеиваются в перекрёсток.
+   По графу ищется кратчайший путь (Дейкстра); его длина даёт время доезда, по нему же едет назначенный автобус. */
+const ROAD_SPEED = 22/3.6;   // средняя скорость резерва по городу, м/с
+let RG = null;
+function roadGraph(){
+  if(RG) return RG;
+  const nodes=[], adj=[], grid=new Map(), CELL=60, MERGE=35;
+  const nodeAt = ll => {
+    const [x,y]=toXY(ll), gx=Math.floor(x/CELL), gy=Math.floor(y/CELL);
+    for(let i=-1;i<=1;i++) for(let j=-1;j<=1;j++){ const arr=grid.get((gx+i)+':'+(gy+j)); if(arr) for(const n of arr){ const q=nodes[n].xy; if((q[0]-x)**2+(q[1]-y)**2 < MERGE*MERGE) return n; } }
+    const id=nodes.length; nodes.push({ll, xy:[x,y]}); adj.push([]); const k=gx+':'+gy; if(!grid.has(k)) grid.set(k,[]); grid.get(k).push(id); return id;
+  };
+  const link = (a,b) => { if(a===b || adj[a].some(e=>e[0]===b)) return; const w=hav(nodes[a].ll,nodes[b].ll); adj[a].push([b,w]); adj[b].push([a,w]); };
+  Object.values(routes).forEach(r=>{ let prev=null; for(let d=0; d<=r.path.len; d+=40){ const n=nodeAt(pointAt(r.path, Math.min(d, r.path.len)).ll); if(prev!==null) link(prev,n); prev=n; } const e=nodeAt(pointAt(r.path, r.path.len).ll); if(prev!==null) link(prev,e); });
+  RG = {nodes, adj}; return RG;
+}
+function roadPath(from, to){
+  const G=roadGraph(), N=G.nodes.length;
+  const near = ll => { const [x,y]=toXY(ll); let b=-1, bd=Infinity; for(let i=0;i<N;i++){ const q=G.nodes[i].xy, d=(q[0]-x)**2+(q[1]-y)**2; if(d<bd){ bd=d; b=i; } } return b; };
+  const s=near(from), t=near(to); if(s<0||t<0) return null;
+  const dist=new Float64Array(N).fill(Infinity), prev=new Int32Array(N).fill(-1); dist[s]=0;
+  const heap=[[0,s]];
+  const push=(it)=>{ heap.push(it); let i=heap.length-1; while(i>0){ const p=(i-1)>>1; if(heap[p][0]<=heap[i][0]) break; [heap[p],heap[i]]=[heap[i],heap[p]]; i=p; } };
+  const pop=()=>{ const top=heap[0], last=heap.pop(); if(heap.length){ heap[0]=last; let i=0; for(;;){ const l=2*i+1, r=l+1; let m=i; if(l<heap.length&&heap[l][0]<heap[m][0]) m=l; if(r<heap.length&&heap[r][0]<heap[m][0]) m=r; if(m===i) break; [heap[m],heap[i]]=[heap[i],heap[m]]; i=m; } } return top; };
+  while(heap.length){ const [d,u]=pop(); if(d>dist[u]) continue; if(u===t) break; for(const [v,w] of G.adj[u]){ const nd=d+w; if(nd<dist[v]){ dist[v]=nd; prev[v]=u; push([nd,v]); } } }
+  if(!isFinite(dist[t])) return null;
+  const ids=[]; for(let v=t; v!==-1; v=prev[v]) ids.push(v); ids.reverse();
+  const lls=[from, ...ids.map(i=>G.nodes[i].ll), to];
+  let len=0; for(let i=1;i<lls.length;i++) len+=hav(lls[i-1],lls[i]);
+  return {lls, len, sec:len/ROAD_SPEED};
+}
+function routeCandidates(){ candRoutes = {}; candLocked = false; if(!incident) return; reserves.forEach(r=>{ const p = roadPath(r.ll, incident.ll); if(p) candRoutes[r.id] = p; }); }
 
 /* routes & stops */
 const routeLines = {};
@@ -2295,8 +2339,7 @@ function drawFx(){
       const path = candPath(c);
       L.polyline(path,{pane:'routes', color: sel?brand:muted, weight: sel?4:2.5, opacity: c.kind==='break'?.4:1, dashArray: sel?'1 8':'2 7', lineCap:'round', interactive:false}).addTo(L_.fx);
       if(state==='deciding'){
-        const mid = path[Math.floor(path.length/2)];
-        L.marker(mid,{icon:L.divIcon({className:'', html:`<div class="eta-tag${sel?' is-sel':''}${c.kind==='break'?' is-off':''}">${c.id} · ${c.kind==='break'?'до '+c.until:c.eta+' мин'}</div>`, iconSize:[0,0]}), interactive:false, pane:'labels'}).addTo(L_.fx);
+        L.marker(c.ll,{icon:L.divIcon({className:'', html:`<div class="eta-tag at-bus${sel?' is-sel':''}${c.kind==='break'?' is-off':''}">${c.id} · ${c.kind==='break'?'до '+c.until:c.eta+' мин'}</div>`, iconSize:[0,0]}), interactive:false, pane:'labels'}).addTo(L_.fx);
       }
     });
   }
@@ -2308,16 +2351,17 @@ function cands(){
   return reserves.map(r=>{
     const real = candRoutes[r.id];
     const dist = real ? real.len : hav(r.ll, incident.ll)*1.35;
-    const eta = Math.max(2, Math.round((real ? real.sec/60 : dist/1000/22*60) + r.prep));
+    const eta = Math.max(2, Math.round((real ? real.sec/60 : dist/ROAD_SPEED/60) + r.prep));
+    const place = r.onRoute ? `М${r.onRoute} · в рейсе, у ост. «${nextStop({route:r.onRoute, phase:r.phase}).stop.name}»` : r.place;
     const penalty = r.kind==='busy'?6 : r.kind==='depot'?2 : r.kind==='break'?99 : 0;
     const capPen = r.cap < incident.bus.cap ? 3 : 0;
-    return {...r, dist, eta, score: eta + penalty + capPen};
+    return {...r, place, dist, eta, score: eta + penalty + capPen};
   }).sort((a,b)=>a.score-b.score);
 }
 
 function openDecision(){
   if(!(state==='incident' || state==='deciding')) return;
-  clearInterval(beepTimer); candLocked = true;
+  clearInterval(beepTimer); routeCandidates(); candLocked = true;
   const list = cands(); if(!selCand || !list.find(c=>c.id===selCand.id)) selCand = list[0];
   setState('deciding');
   renderDecision(); openDrawer();
@@ -2558,6 +2602,8 @@ function loop(t){
     const L2 = 2*routes[b.route].path.len; b.phase = (b.phase + SPEED*dt) % L2;
     busMarkers[b.id] && busMarkers[b.id].setLatLng(busPos(b).ll);
   });
+  const rb = reserves.find(x=>x.onRoute);
+  if(rb && (state==='idle'||state==='incident'||state==='resolved')){ const L2=2*routes[rb.onRoute].path.len; rb.phase=(rb.phase+SPEED*dt)%L2; rb.ll=busPos({route:rb.onRoute, phase:rb.phase}).ll; resMarkers[rb.id] && resMarkers[rb.id].setLatLng(rb.ll); }
   if(assignAnim){
     const a = assignAnim; const k = clamp((t-a.t0)/1000/a.dur,0,1); a.progress=k; a.leftReal = (1-k)*selCand.eta*60;
     const d = a.len*k; let i=0; while(i<a.cum.length-2 && a.cum[i+1]<d) i++;
@@ -2586,7 +2632,7 @@ function resetScenario(){
   L_.buses.clearLayers(); L_.fx.clearLayers();
   Object.keys(buses).forEach(k=>delete buses[k]); Object.keys(busMarkers).forEach(k=>delete busMarkers[k]);
   incident=null; selCand=null; assignAnim=null; lastReaction=null; selRoute=null; $('#routeFilter').hidden=true;
-  candRoutes = {}; rebuildFleet(); relocateReserves(); drawReserves(); createBusMarkers(); seedFeed();
+  candRoutes = {}; rebuildFleet(); relocateReserves(); setupBusyReserve(); drawReserves(); createBusMarkers(); seedFeed();
   setState('idle'); fitCity(true); startCountdown(); applyGeometry();
 }
 function rebuildFleet(){ buildFleet(); }
@@ -2963,6 +3009,8 @@ const HELP = [
      <li><b>+3 мин</b>, если мест меньше, чем у сломанного автобуса.</li>
      <li><b>Недоступен</b>, если у водителя перерыв по графику труда — такой резерв нельзя выбрать.</li>
    </ul>
+   <p><b>Пунктир на карте</b> — путь, которым резерв поедет к месту поломки: по улицам, кратчайшей дорогой. Время доезда в карточке посчитано по длине этого пути. Яркий пунктир — у выбранного резерва, бледный — у остальных; подпись «борт · минуты» стоит над самим автобусом.</p>
+   <p>Резервы обычно стоят: на резервной площадке, в депо, на конечной у водителя перерыв. Если резерв сейчас работает на другом маршруте, он едет по нему, и его путь пересчитывается в момент, когда вы открываете окно замены.</p>
    <p>Рекомендация — подсказка, а не решение. Окончательный выбор всегда за диспетчером.</p>`},
   {id:'colors', cat:'ui', icon:'pin', title:'Цвета и статусы автобусов', sum:'Что означает каждый цвет на карте и в списках',
    body:`<p>У каждого цвета одно значение — на карте, в ленте, в разделах и в показателях.</p>
