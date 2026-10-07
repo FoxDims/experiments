@@ -1260,6 +1260,54 @@ body:not(.is-brief) .bp-h .chip{display:none}
 @media (max-width:900px){ .h-legend li{grid-template-columns:1fr;gap:4px} .h-row .chip{display:none!important} }
 /* средние окна (901–1280 px): кнопки слоёв уже во второй строке — поиск занимает всю ширину от левого края карты до переключателя «Схема / Карта» */
 @media (min-width:901px) and (max-width:1280px){ .search-top{left:16px!important;right:calc(16px + var(--bm-w,132px) + 12px)!important;width:auto!important;max-width:none!important;transform:none!important} }
+
+/* ---------- «Слои карты» ---------- */
+.ly-btn,.ly-bg{display:none}
+@media (max-width:1280px){
+  .overlay-tl{display:none!important}
+  .basemap-sw{display:none!important}
+  .ly-btn{display:grid;place-items:center;position:absolute;z-index:560;top:16px;right:16px;width:44px;height:44px;border-radius:50%;color:var(--text);background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
+  .ly-btn .ic{width:20px;height:20px}
+  .ly-btn.is-on{background:var(--text);color:var(--surface)}
+  .search-top{left:16px!important;right:70px!important;width:auto!important;max-width:none!important;transform:none!important}
+  .overlay-tr{top:72px!important}
+  .alert{top:72px!important}
+  .ly-bg{display:block;position:fixed;inset:0;z-index:2700}
+  .ly-bg[hidden]{display:none}
+  .ly-panel{position:fixed;width:300px;background:var(--surface);border-radius:20px;padding:14px 16px 12px;box-shadow:var(--shadow-l);border:1px solid var(--line)}
+  .ly-panel .me-grip{display:none}
+  .ly-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .ly-head b{font-size:15px;font-weight:600}
+  .ly-x{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--text-3);background:var(--surface-2)}
+  .ly-x .ic{width:16px;height:16px}
+  .ly-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--text);text-align:left}
+  .ly-row>span:first-child:not(.ic){flex:1;color:var(--text-2)}
+  .ly-tg>span:nth-child(2){flex:1}
+  .ly-tg .ic{color:var(--text-3);width:18px;height:18px}
+  .ly-seg{width:auto;padding:3px}
+  .ly-seg button{height:30px;padding:0 14px}
+  .ly-panel .sw{flex:none;width:42px;height:26px;border-radius:999px;background:var(--surface-3);position:relative;transition:background .2s}
+  .ly-panel .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+  .ly-panel .sw.on{background:var(--brand)}
+  .ly-panel .sw.on::after{transform:translateX(16px)}
+  .ly-sub{margin:12px 0 6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
+  .ly-leg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--text-2)}
+  .ly-leg li{display:flex;align-items:center;gap:8px}
+  .ly-leg b{margin-left:auto;font:600 13px var(--f-num);color:var(--text)}
+  .ly-leg .res-sw{width:10px;height:10px;border-radius:3px;border:1.5px solid var(--text-2);background:var(--surface)}
+}
+@media (max-width:900px){
+  .ly-btn{top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:44px;height:44px}
+  .search-top{left:12px!important;right:64px!important}
+  .alert{top:calc(66px + env(safe-area-inset-top,0px))!important}
+  .ly-bg{background:rgba(10,8,18,.42);display:flex;align-items:flex-end}
+  .ly-bg[hidden]{display:none}
+  .ly-panel{position:static;width:100%;border-radius:24px 24px 0 0;border:0;padding:8px 18px calc(18px + env(safe-area-inset-bottom,0px));animation:sheetUp .28s cubic-bezier(.2,.8,.2,1)}
+  .ly-panel .me-grip{display:block}
+  .ly-head b{font-size:17px}
+  .ly-row{padding:14px 0;font-size:15px}
+  .ly-leg{font-size:14px;gap:10px}
+}
 </style>
 </head>
 <body>
@@ -1294,6 +1342,7 @@ body:not(.is-brief) .bp-h .chip{display:none}
     <div id="ymap" aria-hidden="true"></div>
     <div id="map" aria-label="Карта Рязани с движением автобусов"></div>
     <div class="search-top"><label class="search"><span data-ic="search"></span><span class="sr">Поиск</span><input id="search" placeholder="Борт, маршрут или остановка" autocomplete="off"><span class="kbd">/</span></label></div>
+    <button class="ly-btn" id="lyBtn" aria-haspopup="dialog" aria-expanded="false" aria-label="Слои карты" title="Слои карты"><span data-ic="layers"></span></button>
     <div class="kpi-dock"><div class="kpis" id="kpis" aria-label="Показатели смены"></div></div>
     <div class="clock" hidden><b id="clock">--:--:--</b><span id="dateLine"></span></div>
     <div class="overlay-tl">
@@ -1370,6 +1419,17 @@ body:not(.is-brief) .bp-h .chip{display:none}
   <button data-view="analytics"><span data-ic="chart"></span><b>Аналитика</b></button>
   <button class="tab-me" id="meBtn" aria-haspopup="dialog"><span class="avatar">АМ</span><b>Профиль</b></button>
 </nav>
+<div class="ly-bg" id="lyBg" hidden>
+  <div class="ly-panel" role="dialog" aria-label="Слои карты">
+    <i class="me-grip"></i>
+    <div class="ly-head"><b>Слои карты</b><button class="ly-x" data-ly="close" aria-label="Закрыть"><span data-ic="x"></span></button></div>
+    <div class="ly-row"><span>Вид</span><div class="seg ly-seg"><button data-ly="schema">Схема</button><button data-ly="min">Карта</button></div></div>
+    <button class="ly-row ly-tg" data-ly="stops"><span data-ic="pin"></span><span>Остановки</span><i class="sw"></i></button>
+    <button class="ly-row ly-tg" data-ly="reserve"><span data-ic="bus"></span><span>Резерв</span><i class="sw"></i></button>
+    <div class="ly-sub">Статус ТС</div>
+    <ul class="ly-leg" id="lyLeg"></ul>
+  </div>
+</div>
 <div class="me-bg" id="meBg" hidden>
   <div class="me-sheet" role="dialog" aria-modal="true" aria-label="Профиль и настройки">
     <i class="me-grip"></i>
@@ -1416,6 +1476,7 @@ const ICONS = {
   loader:'<path d="M21 12a9 9 0 1 1-6.2-8.6"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   nav:'<path d="M3 11l19-9-9 19-2-8z"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17.5l9 5 9-5" opacity=".55"/>',
   fuel:'<path d="M3 22h12M4 9h10M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.8a2 2 0 0 0-.6-1.4L18 5"/>',
   radio:'<path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/>',
   arrowr:'<path d="M5 12h14M13 6l6 6-6 6"/>'
@@ -3027,6 +3088,43 @@ const _setView = setView;
 setView = function(v){ if(isMobile()){ $('#view').classList.remove('has-detail'); if(VS[v]) VS[v].sel = null; } _setView(v); if(v==='map' && isMobile()) setTimeout(()=>map.invalidateSize(), 60); };
 $$('[data-view]').forEach(b=>{ const nb = b.cloneNode(true); b.replaceWith(nb); nb.addEventListener('click', ()=>setView(nb.dataset.view)); });
 window.addEventListener('resize', ()=>{ clearTimeout(window.__mvT); window.__mvT = setTimeout(()=>{ map.invalidateSize(); placeLegend(); }, 200); });
+/* ---------- «Слои карты»: одна кнопка вместо пилюль на окнах до 1280 px ---------- */
+function syncLayers(){
+  const bs=$('#bmSchema'), bm=$('#bmMin');
+  const sB=$('[data-ly="schema"]'), mB=$('[data-ly="min"]');
+  sB.setAttribute('aria-pressed', bs.getAttribute('aria-pressed')); mB.setAttribute('aria-pressed', bm.getAttribute('aria-pressed'));
+  mB.disabled = bm.disabled; mB.title = bm.title;
+  $('[data-ly="stops"] .sw').classList.toggle('on', $('#tgStops').getAttribute('aria-pressed')==='true');
+  $('[data-ly="reserve"] .sw').classList.toggle('on', $('#tgReserve').getAttribute('aria-pressed')==='true');
+  const c = counts();
+  $('#lyLeg').innerHTML = [['ok','По графику',c.ok],['warn','Опоздание 2–5 мин',c.warn],['late','Более 5 мин',c.late],['crit','Авария',c.crit]].map(([k,l,n])=>`<li><span class="sdot ${k}"></span>${l}<b class="num">${n}</b></li>`).join('')
+    + `<li><span class="res-sw"></span>Резерв<b class="num">${reserves.length}</b></li>`;
+}
+let lyTimer=null;
+function placeLy(){
+  if(isMobile()) { $('.ly-panel').style.cssText=''; return; }
+  const r=$('#lyBtn').getBoundingClientRect(); const p=$('.ly-panel');
+  p.style.top=(r.bottom+8)+'px'; p.style.right=(innerWidth-r.right)+'px';
+}
+function openLayers(on){
+  $('#lyBg').hidden=!on; $('#lyBtn').setAttribute('aria-expanded', on); $('#lyBtn').classList.toggle('is-on', on);
+  clearInterval(lyTimer);
+  if(on){ syncLayers(); placeLy(); lyTimer=setInterval(syncLayers, 2000); }
+}
+$('#lyBtn').addEventListener('click', ()=>openLayers($('#lyBg').hidden));
+$('#lyBg').addEventListener('click', e=>{
+  if(e.target.id==='lyBg'){ openLayers(false); return; }
+  const b=e.target.closest('[data-ly]'); if(!b || b.disabled) return;
+  const k=b.dataset.ly;
+  if(k==='close'){ openLayers(false); return; }
+  if(k==='schema') $('#bmSchema').click();
+  if(k==='min') $('#bmMin').click();
+  if(k==='stops') $('#tgStops').click();
+  if(k==='reserve') $('#tgReserve').click();
+  syncLayers();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#lyBg').hidden){ openLayers(false); e.stopPropagation(); } }, true);
+window.addEventListener('resize', ()=>{ if(!$('#lyBg').hidden){ if(innerWidth>1280) openLayers(false); else placeLy(); } });
 window.setView = (v)=>setView(v);
 loadYandex();
 window.addEventListener('resize', ()=> map.invalidateSize());
