@@ -1308,6 +1308,11 @@ body:not(.is-brief) .bp-h .chip{display:none}
   .ly-row{padding:14px 0;font-size:15px}
   .ly-leg{font-size:14px;gap:10px}
 }
+/* итоги назначения — всегда в один ряд, компактно */
+.metrics,.drawer .metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
+.drawer .metric{padding:10px 12px;min-width:0}
+.drawer .metric span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.drawer .metric b{font-size:17px!important;white-space:nowrap}
 </style>
 </head>
 <body>
