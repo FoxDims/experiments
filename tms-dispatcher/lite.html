@@ -1974,6 +1974,18 @@ body:not(.is-brief) .bp-h .chip{display:none}
 .drawer .metric{padding:10px 12px;min-width:0}
 .drawer .metric span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .drawer .metric b{font-size:17px!important;white-space:nowrap}
+/* окна шире 1280 px: кнопки слоёв, поиск и «Схема / Карта» — в один ряд; поиск занимает промежуток между ними
+   (до 420 px по центру промежутка, на узких окнах сужается) */
+@media (min-width:1281px){
+  .overlay-tl{top:16px!important}
+  .search-top{left:calc(16px + var(--chips-w,390px) + 12px)!important;right:calc(16px + var(--bm-w,132px) + 12px)!important;width:auto!important;max-width:420px!important;margin:0 auto;transform:none!important}
+  .alert{top:72px!important}
+}
+@media (min-width:1281px){
+  .stage.row-tight .overlay-tl{top:72px!important}
+  .stage.row-tight .search-top{left:16px!important;max-width:none!important}
+  .stage.row-tight .alert{top:128px!important}
+}
 </style>
 </head>
 <body>
@@ -3791,6 +3803,15 @@ $('#lyBg').addEventListener('click', e=>{
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !$('#lyBg').hidden){ openLayers(false); e.stopPropagation(); } }, true);
 window.addEventListener('resize', ()=>{ if(!$('#lyBg').hidden){ if(innerWidth>1280) openLayers(false); else placeLy(); } });
+/* ширина блока кнопок слоёв и переключателя подложки — для расчёта места под поиск */
+const chipsRO = new ResizeObserver(()=>{
+  const r=document.documentElement.style; const cw=Math.ceil($('.overlay-tl').getBoundingClientRect().width), bw=Math.ceil($('.basemap-sw').getBoundingClientRect().width||132);
+  r.setProperty('--chips-w', cw+'px'); r.setProperty('--bm-w', bw+'px');
+  // если поиску остаётся меньше 220 px (например, появилась кнопка «Маршрут N»), кнопки слоёв уходят во вторую строку
+  const free = $('#stage').getBoundingClientRect().width - 16 - cw - 12 - 12 - bw - 16;
+  $('#stage').classList.toggle('row-tight', free < 220);
+});
+chipsRO.observe($('.overlay-tl')); chipsRO.observe($('.basemap-sw')); chipsRO.observe($('#stage'));
 window.setView = (v)=>setView(v);
 loadYandex();
 window.addEventListener('resize', ()=> map.invalidateSize());
